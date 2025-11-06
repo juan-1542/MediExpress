@@ -22,10 +22,15 @@ public class UsuarioControlador {
     public void crear(@RequestBody  Usuario usuario){
         this.servicio.registrar(usuario);
     }
+
     @GetMapping("/get")
     public List<Usuario> consultar(){
         return this.servicio.consultarTodos();
+    }
 
+    @DeleteMapping("/delete/{id}")
+    public void eliminar(@PathVariable long id){
+        this.servicio.eliminar(id);
     }
 
 }

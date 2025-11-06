@@ -23,4 +23,5 @@ public class UsuarioServicio {
     public List<Usuario> consultarTodos(){
         return this.repositorio.findAll();
     }
+    public void eliminar(long id){this.repositorio.deleteById(id);}
 }

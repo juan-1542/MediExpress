@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Pantallas/Login.dart';
 import 'package:medi_express_front/Pantallas/Producto.dart';
+import 'package:medi_express_front/Pantallas/Admin.dart';
+import 'package:medi_express_front/Pantallas/EditProfile.dart';
+import 'package:medi_express_front/Servicios/auth_service.dart';
 import 'package:medi_express_front/Servicios/cart_service.dart';
 import 'package:medi_express_front/Pantallas/Carrito.dart';
 import 'package:medi_express_front/Pantallas/Estado_Pedido.dart';
+import 'package:medi_express_front/Servicios/product_service.dart';
+import 'package:medi_express_front/Servicios/distribution_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -18,38 +23,17 @@ class _HomeScreenState extends State<HomeScreen> {
   int? _minPrice;
   int? _maxPrice;
 
-  final List<Map<String, String>> _medications = [
-    {
-      'name': 'Paracetamol',
-      'dosage': '500 mg',
-      'price': '\$15.000',
-    },
-    {
-      'name': 'Ibuprofeno',
-      'dosage': '200 mg',
-      'price': '\$18.000',
-    },
-    {
-      'name': 'Amoxicilina',
-      'dosage': '250 mg',
-      'price': '\$21.000',
-    },
-    {
-      'name': 'Lorazepam',
-      'dosage': '1 mg',
-      'price': '\$15.000',
-    },
-  ];
-
+  // Ahora usamos ProductService para obtener los productos dinámicamente
   List<Map<String, String>> get _filteredMedications {
-    if (_search.trim().isEmpty && _minPrice == null && _maxPrice == null) return _medications;
+    final all = ProductService.instance.products.value;
+    if (_search.trim().isEmpty && _minPrice == null && _maxPrice == null) return all;
     final q = _search.toLowerCase();
-    return _medications.where((m) {
-      final matchesText = _search.trim().isEmpty
-          ? true
-          : (m['name']!.toLowerCase().contains(q) || m['dosage']!.toLowerCase().contains(q));
+    return all.where((m) {
+      final name = (m['name'] ?? '').toLowerCase();
+      final dosage = (m['dosage'] ?? '').toLowerCase();
+      final matchesText = _search.trim().isEmpty ? true : (name.contains(q) || dosage.contains(q));
 
-      // Parse price like "\$15.000" -> 15000
+      // Parse price like "15000" or "\$15.000" -> 15000
       int parsePrice(String? priceStr) {
         if (priceStr == null) return 0;
         final digits = priceStr.replaceAll(RegExp(r'[^0-9]'), '');
@@ -73,6 +57,15 @@ class _HomeScreenState extends State<HomeScreen> {
       // Si no hay pedido reciente mostramos un estado por defecto
       Navigator.push(context, MaterialPageRoute(builder: (_) => EstadoPedidoScreen(orderId: '0', status: 'Sin pedidos')));
     }
+    // Si el usuario toca Perfil (índice 3), navegar a la pantalla de perfil
+    else if (index == 3) {
+      final user = AuthService.instance.currentUser.value;
+      if (user != null) {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => EditProfileScreen(initialUser: user)));
+      } else {
+        Navigator.pushNamed(context, '/perfil');
+      }
+    }
   }
 
   void _openProfileSlide() {
@@ -86,6 +79,29 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               SizedBox(height: 8),
               Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+              ListTile(
+                leading: Icon(Icons.person_outline),
+                title: Text('Mi perfil'),
+                onTap: () {
+                  Navigator.pop(context);
+                  final user = AuthService.instance.currentUser.value;
+                  if (user != null) {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => EditProfileScreen(initialUser: user)));
+                  } else {
+                    Navigator.pushNamed(context, '/perfil');
+                  }
+                },
+              ),
+              // Mostrar acceso al panel admin solo si el usuario actual es admin
+              if (AuthService.instance.currentUser.value?.isAdmin ?? false)
+                ListTile(
+                  leading: Icon(Icons.admin_panel_settings),
+                  title: Text('Panel Admin'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => AdminScreen()));
+                  },
+                ),
               ListTile(
                 leading: Icon(Icons.login),
                 title: Text('Iniciar Sesión'),
@@ -263,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Column(
+        child: _selectedIndex == 2 ? _buildLocalesView() : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Campo de búsqueda
@@ -306,13 +322,19 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A)),
             ),
             SizedBox(height: 12),
-            // Lista
+            // Lista (escucha cambios en ProductService)
             Expanded(
-              child: ListView.builder(
-                itemCount: _filteredMedications.length,
-                itemBuilder: (context, index) {
-                  final m = _filteredMedications[index];
-                  return _buildMedicationCard(m['name']!, m['dosage']!, m['price']!);
+              child: ValueListenableBuilder<List<Map<String, String>>>(
+                valueListenable: ProductService.instance.products,
+                builder: (context, _, __) {
+                  final list = _filteredMedications;
+                  return ListView.builder(
+                    itemCount: list.length,
+                    itemBuilder: (context, index) {
+                      final m = list[index];
+                      return _buildMedicationCard(m['name'] ?? '', m['dosage'] ?? '', m['price'] ?? '');
+                    },
+                  );
                 },
               ),
             ),
@@ -381,6 +403,46 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLocalesView() {
+    return ValueListenableBuilder(
+      valueListenable: DistributionService.instance.info,
+      builder: (context, info, _) {
+        if (info == null) return Center(child: Text('No hay información de locales'));
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Locales', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+            SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(info.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
+                    Text('Dirección: ${info.address}'),
+                    SizedBox(height: 4),
+                    Text('Horario: ${info.openingHours}'),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text('Disponibilidad: '),
+                        Icon(info.available ? Icons.check_circle : Icons.cancel, color: info.available ? Colors.green : Colors.red),
+                        SizedBox(width: 8),
+                        Text(info.available ? 'Disponible' : 'No disponible'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

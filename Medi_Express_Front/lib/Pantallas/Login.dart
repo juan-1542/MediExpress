@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Pantallas/Registro_Usuario.dart';
+import 'package:medi_express_front/Servicios/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -19,9 +20,22 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _loading = true);
     Future.delayed(Duration(milliseconds: 700), () {
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Inicio de sesión simulado')));
-      // Aquí podrías autenticar y navegar a la pantalla principal
+      final email = _userController.text.trim();
+      final password = _passwordController.text;
+      final ok = AuthService.instance.loginWithCredentials(email, password);
+      if (!ok) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Credenciales inválidas o usuario no registrado')));
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Inicio de sesión correcto')));
+      Navigator.pop(context, true);
     });
+  }
+
+  void _useDemoCredential(Map<String, String> cred, {bool submit = false}) {
+    _userController.text = cred['login'] ?? '';
+    _passwordController.text = cred['password'] ?? '';
+    if (submit) _submit();
   }
 
   @override
@@ -103,6 +117,43 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         child: Text('¿No tienes cuenta? Regístrate', style: TextStyle(color: Color(0xFF0077B6))),
                       ),
+                      // Bloque de credenciales demo (si existen)
+                      if (AuthService.instance.demoCredentials.isNotEmpty) ...[
+                        SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text('Credenciales de demo', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+                        ),
+                        SizedBox(height: 6),
+                        Column(
+                          children: AuthService.instance.demoCredentials.map((c) {
+                            final login = c['login'] ?? '';
+                            final pw = c['password'] ?? '';
+                            return Card(
+                              color: Color(0xFFF5F9FB),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(child: Text('$login  •••  $pw', style: TextStyle(color: Color(0xFF4A90E2)))),
+                                    TextButton(
+                                      onPressed: () => _useDemoCredential(c, submit: false),
+                                      child: Text('Usar', style: TextStyle(color: Color(0xFF0077B6))),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => _useDemoCredential(c, submit: true),
+                                      child: Text('Entrar', style: TextStyle(color: Color(0xFF0077B6))),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        SizedBox(height: 6),
+                      ],
                     ],
                   ),
                 ),

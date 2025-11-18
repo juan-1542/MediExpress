@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Pantallas/Registro_Usuario.dart';
+import 'package:medi_express_front/Pantallas/Home.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -28,7 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Inicio de sesión correcto')));
-      Navigator.pop(context, true);
+      // Reemplazamos la pantalla actual por HomeScreen después de iniciar sesión
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
     });
   }
 

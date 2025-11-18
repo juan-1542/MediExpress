@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/cart_service.dart';
-import 'package:medi_express_front/Pantallas/Estado_Pedido.dart';
 
 class CarritoScreen extends StatefulWidget {
   const CarritoScreen({Key? key}) : super(key: key);
@@ -120,28 +119,15 @@ class _CarritoScreenState extends State<CarritoScreen> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          // Simular ir a pagar
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Pagar'),
-                              content: Text('Simulación de pago. Total: ${_formatPrice(total)}'),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancelar')),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    // Generar un ID de pedido simple y vaciar carrito
-                                    final orderId = DateTime.now().millisecondsSinceEpoch.toString();
-                                    CartService.instance.clear();
-                                    Navigator.pop(context); // cerrar dialog
-                                    // navegar a pantalla de estado del pedido
-                                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => EstadoPedidoScreen(orderId: orderId, status: 'Pago aprobado')));
-                                  },
-                                  child: Text('Confirmar'),
-                                ),
-                              ],
-                            ),
-                          );
+                          // Navegar a la pantalla de Pago pasando los artículos del carrito
+                          final args = items.map((it) => {
+                            'name': it.name,
+                            'price': it.price,
+                            'quantity': it.quantity,
+                            'image': it.image ?? '',
+                          }).toList();
+
+                          Navigator.pushNamed(context, '/pago', arguments: args);
                         },
                         child: Text('Ir a pagar'),
                         style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14)),

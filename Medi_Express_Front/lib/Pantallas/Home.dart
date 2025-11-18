@@ -69,6 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openProfileSlide() {
+    // Guardar el contexto del widget (padre) para usarlo después de cerrar el modal
+    final parentContext = context;
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -102,12 +104,32 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => AdminScreen()));
                   },
                 ),
-              ListTile(
-                leading: Icon(Icons.login),
-                title: Text('Iniciar Sesión'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+              // Mostrar 'Cerrar sesión' si hay usuario logueado, o 'Iniciar Sesión' si no
+              ValueListenableBuilder(
+                valueListenable: AuthService.instance.currentUser,
+                builder: (context, user, _) {
+                  if (user != null) {
+                    return ListTile(
+                      leading: Icon(Icons.logout),
+                      title: Text('Cerrar sesión'),
+                      onTap: () {
+                        // Cerrar sesión en el servicio
+                        AuthService.instance.logout();
+                        // Cerrar el modal (context aquí es el del modal)
+                        Navigator.pop(context);
+                        // Navegar a Login reemplazando la pantalla actual (usar el contexto padre)
+                        Navigator.pushReplacement(parentContext, MaterialPageRoute(builder: (_) => LoginScreen()));
+                      },
+                    );
+                  }
+                  return ListTile(
+                    leading: Icon(Icons.login),
+                    title: Text('Iniciar Sesión'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+                    },
+                  );
                 },
               ),
               ListTile(
@@ -332,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: list.length,
                     itemBuilder: (context, index) {
                       final m = list[index];
-                      return _buildMedicationCard(m['name'] ?? '', m['dosage'] ?? '', m['price'] ?? '');
+                      return _buildMedicationCard(m['name'] ?? '', m['dosage'] ?? '', m['price'] ?? '', m['quantity'] ?? '0');
                     },
                   );
                 },
@@ -357,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildMedicationCard(String name, String dosage, String price) {
+  Widget _buildMedicationCard(String name, String dosage, String price, String quantity) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Material(
@@ -366,45 +388,72 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: () {
+            final q = int.tryParse(quantity.toString()) ?? 0;
+            final isAdmin = AuthService.instance.currentUser.value?.isAdmin ?? false;
+            if (q <= 0 && !isAdmin) {
+              // No permitir revisar si no hay stock y no es admin
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto no disponible')));
+              return;
+            }
             // navegar a la pantalla de producto pasando los datos
-            final item = {'name': name, 'dosage': dosage, 'price': price, 'description': 'Use según indicación del profesional de la salud. Mantener fuera del alcance de los niños.'};
+            final item = {
+              'name': name,
+              'dosage': dosage,
+              'price': price,
+              'quantity': quantity,
+              'description': 'Use según indicación del profesional de la salud. Mantener fuera del alcance de los niños.'
+            };
             Navigator.push(context, MaterialPageRoute(builder: (_) => ProductScreen(product: item)));
           },
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 14.0),
-            child: Row(
-              children: [
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFE8F9FF),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Icon(Icons.medication, color: Color(0xFF7EC8E3), size: 28),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF123A5A))),
-                      SizedBox(height: 4),
-                      Text(dosage, style: TextStyle(fontSize: 13, color: Colors.grey[700])),
-                    ],
-                  ),
-                ),
-                Text(price, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+           borderRadius: BorderRadius.circular(12),
+           child: Padding(
+             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 14.0),
+             child: Row(
+               children: [
+                 Container(
+                   width: 54,
+                   height: 54,
+                   decoration: BoxDecoration(
+                     color: Color(0xFFE8F9FF),
+                     borderRadius: BorderRadius.circular(12),
+                   ),
+                   child: Center(
+                     child: Icon(Icons.medication, color: Color(0xFF7EC8E3), size: 28),
+                   ),
+                 ),
+                 SizedBox(width: 12),
+                 Expanded(
+                   child: Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: [
+                       Text(name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF123A5A))),
+                       SizedBox(height: 4),
+                       Text(dosage, style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+                       const SizedBox(height: 6),
+                       // Mostrar disponibilidad: si la cantidad es 0 mostrar 'Producto no disponible' para todos.
+                       // Si hay stock, solo mostrar la cantidad al admin.
+                       Builder(builder: (_) {
+                         final q = int.tryParse(quantity.toString()) ?? 0;
+                         if (q <= 0) {
+                           return Text('Producto no disponible', style: TextStyle(fontSize: 13, color: Colors.redAccent, fontWeight: FontWeight.w600));
+                         }
+                         final isAdmin = AuthService.instance.currentUser.value?.isAdmin ?? false;
+                         if (isAdmin) {
+                           return Text('Cantidad: $q', style: TextStyle(fontSize: 13, color: Colors.green[700]));
+                         }
+                         return const SizedBox.shrink();
+                       }),
+                     ],
+                   ),
+                 ),
+                 Text(price, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+   }
 
   Widget _buildLocalesView() {
     return ValueListenableBuilder(

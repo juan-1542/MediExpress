@@ -13,10 +13,10 @@ class ProductService {
   void _seedDefaults() {
     // Productos por defecto que antes estaban en Home
     final defaults = [
-      {'name': 'Paracetamol', 'dosage': '500 mg', 'price': '15000', 'description': 'Use según indicación del profesional de la salud.'},
-      {'name': 'Ibuprofeno', 'dosage': '200 mg', 'price': '18000', 'description': 'Use según indicación del profesional de la salud.'},
-      {'name': 'Amoxicilina', 'dosage': '250 mg', 'price': '21000', 'description': 'Use según indicación del profesional de la salud.'},
-      {'name': 'Lorazepam', 'dosage': '1 mg', 'price': '15000', 'description': 'Use según indicación del profesional de la salud.'},
+      {'name': 'Paracetamol', 'dosage': '500 mg', 'price': '15000', 'description': 'Use según indicación del profesional de la salud.', 'quantity': '10'},
+      {'name': 'Ibuprofeno', 'dosage': '200 mg', 'price': '18000', 'description': 'Use según indicación del profesional de la salud.', 'quantity': '8'},
+      {'name': 'Amoxicilina', 'dosage': '250 mg', 'price': '21000', 'description': 'Use según indicación del profesional de la salud.', 'quantity': '5'},
+      {'name': 'Lorazepam', 'dosage': '1 mg', 'price': '15000', 'description': 'Use según indicación del profesional de la salud.', 'quantity': '12'},
     ];
     products.value = defaults;
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/cart_service.dart';
 import 'package:medi_express_front/Pantallas/Carrito.dart';
+import 'package:medi_express_front/Servicios/auth_service.dart';
 
 class ProductScreen extends StatefulWidget {
   final Map<String, String> product;
@@ -12,6 +13,8 @@ class ProductScreen extends StatefulWidget {
 
 class _ProductScreenState extends State<ProductScreen> {
   int _quantity = 1;
+
+  int _availableStock = 0;
 
   // Productos sugeridos: ahora incluyen una URL de imagen, nombre y precio
   final List<Map<String, String>> _otherProducts = [
@@ -32,7 +35,13 @@ class _ProductScreenState extends State<ProductScreen> {
     },
   ];
 
-  void _increment() => setState(() => _quantity++);
+  void _increment() => setState(() {
+    if (_availableStock <= 0) return; // no stock
+    if (_quantity < _availableStock) _quantity++;
+    else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No hay suficiente stock')));
+    }
+  });
   void _decrement() {
     if (_quantity > 1) setState(() => _quantity--);
   }
@@ -80,12 +89,35 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Determinar stock si viene en el producto
+    final qtyStr = widget.product['quantity'] ?? '0';
+    _availableStock = int.tryParse(qtyStr) ?? 0;
+
+    // Si no hay stock y el usuario no es admin, cerramos la pantalla
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final isAdmin = AuthService.instance.currentUser.value?.isAdmin ?? false;
+      if (_availableStock <= 0 && !isAdmin) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto no disponible')));
+        Navigator.pop(context);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final p = widget.product;
     final name = p['name'] ?? 'Producto';
     final dosage = p['dosage'] ?? '';
     final price = p['price'] ?? '';
     final description = p['description'] ?? 'Descripción no disponible para este producto.';
+    final isAdmin = AuthService.instance.currentUser.value?.isAdmin ?? false;
+
+    // recalcular stock en build en caso de que el producto provenga de otra fuente
+    _availableStock = int.tryParse(p['quantity'] ?? '0') ?? _availableStock;
+
+    final addButtonEnabled = _availableStock > 0 && _quantity > 0 && _quantity <= _availableStock;
 
     return Scaffold(
       appBar: AppBar(
@@ -184,6 +216,18 @@ class _ProductScreenState extends State<ProductScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              // Mostrar disponibilidad para admin o mensaje para usuarios
+              if (_availableStock <= 0)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                  child: Text('Producto no disponible', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                )
+              else if (isAdmin)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                  child: Text('Stock disponible: $_availableStock', style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.w600)),
+                ),
               SizedBox(height: 18),
               // Sección: También puedes comprar
               Text('También puedes comprar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF123A5A))),
@@ -219,11 +263,11 @@ class _ProductScreenState extends State<ProductScreen> {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {
+                  onPressed: addButtonEnabled ? () {
                     // añadir al servicio de carrito
                     CartService.instance.addItem(CartItem(name: name, price: price, quantity: _quantity, image: p['image']));
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Añadido $_quantity x $name al carrito')));
-                  },
+                  } : null,
                   icon: Icon(Icons.add_shopping_cart),
                   label: Text('Añadir al carrito'),
                   style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14)),

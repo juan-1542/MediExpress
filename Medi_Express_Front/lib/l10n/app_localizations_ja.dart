@@ -30,6 +30,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get adminPanelTitle => '管理パネル';
 
   @override
+  String get adminSubtitle => '製品と店舗の管理';
+
+  @override
   String get logoutTitle => 'ログアウト';
 
   @override
@@ -49,6 +52,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get languageSectionTitle => '言語';
+
+  @override
+  String get languageSubtitle => '優先言語を選択してください';
+
+  @override
+  String get systemLanguageSubtitle => '自動検出';
 
   @override
   String get useSystemLanguage => 'システム言語を使用';
@@ -94,6 +103,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localesTitle => '店舗';
+
+  @override
+  String get localesSubtitle => '利用可能な店舗';
+
+  @override
+  String get storeSelected => '店舗が選択されました';
+
+  @override
+  String get active => 'アクティブ';
 
   @override
   String get noStoreInfo => '店舗情報がありません';
@@ -189,6 +207,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get orderStatusTitle => '注文ステータス';
+
+  @override
+  String get orderStatusSubtitle => '注文の追跡';
+
+  @override
+  String get noOrders => '注文なし';
 
   @override
   String orderLabel(Object orderId) {
@@ -352,7 +376,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get save => '保存';
 
   @override
-  String get editProfileTitle => 'プロフィールを編集';
+  String get editProfileTitle => 'プロフィール編集';
+
+  @override
+  String get profileSubtitle => '個人情報を更新';
+
+  @override
+  String get personalInfoSection => '個人情報';
 
   @override
   String get fullNameLabel => '氏名';

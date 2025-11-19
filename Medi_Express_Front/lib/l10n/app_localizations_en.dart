@@ -30,7 +30,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminPanelTitle => 'Admin Panel';
 
   @override
-  String get logoutTitle => 'Log out';
+  String get adminSubtitle => 'Product and store management';
+
+  @override
+  String get logoutTitle => 'Logout';
 
   @override
   String get loginTitle => 'Log in';
@@ -49,6 +52,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSectionTitle => 'Language';
+
+  @override
+  String get languageSubtitle => 'Select your preferred language';
+
+  @override
+  String get systemLanguageSubtitle => 'Detect automatically';
 
   @override
   String get useSystemLanguage => 'Use system language';
@@ -94,6 +103,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localesTitle => 'Stores';
+
+  @override
+  String get localesSubtitle => 'available stores';
+
+  @override
+  String get storeSelected => 'Store selected';
+
+  @override
+  String get active => 'Active';
 
   @override
   String get noStoreInfo => 'No store information';
@@ -189,6 +207,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderStatusTitle => 'Order Status';
+
+  @override
+  String get orderStatusSubtitle => 'Track your order';
+
+  @override
+  String get noOrders => 'No orders';
 
   @override
   String orderLabel(Object orderId) {
@@ -355,6 +379,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editProfileTitle => 'Edit profile';
+
+  @override
+  String get profileSubtitle => 'Update your personal information';
+
+  @override
+  String get personalInfoSection => 'Personal Information';
 
   @override
   String get fullNameLabel => 'Full name';

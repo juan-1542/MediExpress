@@ -30,6 +30,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adminPanelTitle => 'Panneau Admin';
 
   @override
+  String get adminSubtitle => 'Gestion des produits et des magasins';
+
+  @override
   String get logoutTitle => 'Se déconnecter';
 
   @override
@@ -49,6 +52,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get languageSectionTitle => 'Langue';
+
+  @override
+  String get languageSubtitle => 'Sélectionnez votre langue préférée';
+
+  @override
+  String get systemLanguageSubtitle => 'Détecter automatiquement';
 
   @override
   String get useSystemLanguage => 'Utiliser la langue du système';
@@ -94,6 +103,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get localesTitle => 'Magasins';
+
+  @override
+  String get localesSubtitle => 'magasins disponibles';
+
+  @override
+  String get storeSelected => 'Magasin sélectionné';
+
+  @override
+  String get active => 'Actif';
 
   @override
   String get noStoreInfo => 'Aucune information de magasin';
@@ -191,6 +209,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get orderStatusTitle => 'État de la commande';
+
+  @override
+  String get orderStatusSubtitle => 'Suivi de votre commande';
+
+  @override
+  String get noOrders => 'Aucune commande';
 
   @override
   String orderLabel(Object orderId) {
@@ -360,6 +384,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get editProfileTitle => 'Modifier le profil';
+
+  @override
+  String get profileSubtitle => 'Mettez à jour vos informations personnelles';
+
+  @override
+  String get personalInfoSection => 'Informations Personnelles';
 
   @override
   String get fullNameLabel => 'Nom complet';

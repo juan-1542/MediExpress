@@ -146,10 +146,16 @@ abstract class AppLocalizations {
   /// **'Admin Panel'**
   String get adminPanelTitle;
 
+  /// No description provided for @adminSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Product and store management'**
+  String get adminSubtitle;
+
   /// No description provided for @logoutTitle.
   ///
   /// In en, this message translates to:
-  /// **'Log out'**
+  /// **'Logout'**
   String get logoutTitle;
 
   /// No description provided for @loginTitle.
@@ -187,6 +193,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get languageSectionTitle;
+
+  /// No description provided for @languageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your preferred language'**
+  String get languageSubtitle;
+
+  /// No description provided for @systemLanguageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect automatically'**
+  String get systemLanguageSubtitle;
 
   /// No description provided for @useSystemLanguage.
   ///
@@ -277,6 +295,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stores'**
   String get localesTitle;
+
+  /// No description provided for @localesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'available stores'**
+  String get localesSubtitle;
+
+  /// No description provided for @storeSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Store selected'**
+  String get storeSelected;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
 
   /// No description provided for @noStoreInfo.
   ///
@@ -463,6 +499,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Order Status'**
   String get orderStatusTitle;
+
+  /// No description provided for @orderStatusSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your order'**
+  String get orderStatusSubtitle;
+
+  /// No description provided for @noOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders'**
+  String get noOrders;
 
   /// No description provided for @orderLabel.
   ///
@@ -787,6 +835,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit profile'**
   String get editProfileTitle;
+
+  /// No description provided for @profileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your personal information'**
+  String get profileSubtitle;
+
+  /// No description provided for @personalInfoSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInfoSection;
 
   /// No description provided for @fullNameLabel.
   ///

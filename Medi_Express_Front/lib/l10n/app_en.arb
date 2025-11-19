@@ -7,7 +7,8 @@
   "homeSubtitle": "Your pharmacy in minutes",
   "profileTitle": "My profile",
   "adminPanelTitle": "Admin Panel",
-  "logoutTitle": "Log out",
+  "adminSubtitle": "Product and store management",
+  "logoutTitle": "Logout",
   "loginTitle": "Log in",
   "settingsTitle": "Settings",
 
@@ -16,6 +17,8 @@
   "commonClearFilter": "Clear filter",
 
   "languageSectionTitle": "Language",
+  "languageSubtitle": "Select your preferred language",
+  "systemLanguageSubtitle": "Detect automatically",
   "useSystemLanguage": "Use system language",
   "spanishLabel": "Spanish",
   "englishLabel": "English",
@@ -32,6 +35,9 @@
   "addedToCart": "Added to cart",
   "catalogTitle": "Medicines catalog",
   "localesTitle": "Stores",
+  "localesSubtitle": "available stores",
+  "storeSelected": "Store selected",
+  "active": "Active",
   "noStoreInfo": "No store information",
   "addressLabel": "Address",
   "scheduleLabel": "Schedule",
@@ -72,6 +78,8 @@
   "tabProfile": "Profile",
 
   "orderStatusTitle": "Order Status",
+  "orderStatusSubtitle": "Track your order",
+  "noOrders": "No orders",
   "orderLabel": "Order #{orderId}",
   "@orderLabel": {"placeholders": {"orderId": {}}},
   "summaryTitle": "Summary",
@@ -136,6 +144,8 @@
   "save": "Save",
 
   "editProfileTitle": "Edit profile",
+  "profileSubtitle": "Update your personal information",
+  "personalInfoSection": "Personal Information",
   "fullNameLabel": "Full name",
   "emailLabel": "Email",
   "avatarUrlOptionalLabel": "Avatar URL (optional)",

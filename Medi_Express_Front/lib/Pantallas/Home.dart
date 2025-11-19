@@ -97,10 +97,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return;
     }
     final all = ProductService.instance.products.value;
+    final currentLocale = Localizations.localeOf(context).languageCode;
     final matches = <String>{};
     for (final m in all) {
-      final name = (m['name'] ?? '').toLowerCase();
-      if (name.contains(q)) matches.add(m['name'] ?? '');
+      // Buscar en el nombre del idioma actual y el nombre base
+      final nameKey = 'name_$currentLocale';
+      final localizedName = m[nameKey] ?? m['name'] ?? '';
+      final name = localizedName.toLowerCase();
+      if (name.contains(q)) matches.add(localizedName);
     }
     setState(() {
       _suggestions = matches.where((s) => s.isNotEmpty).take(6).toList();
@@ -115,9 +119,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (_search.trim().isEmpty && _minPrice == null && _maxPrice == null) return all;
     final q = _search.toLowerCase();
     return all.where((m) {
+      // Buscar en todos los nombres de idiomas
       final name = (m['name'] ?? '').toLowerCase();
+      final nameEs = (m['name_es'] ?? '').toLowerCase();
+      final nameEn = (m['name_en'] ?? '').toLowerCase();
+      final namePt = (m['name_pt'] ?? '').toLowerCase();
+      final nameFr = (m['name_fr'] ?? '').toLowerCase();
+      final nameJa = (m['name_ja'] ?? '').toLowerCase();
       final dosage = (m['dosage'] ?? '').toLowerCase();
-      final matchesText = _search.trim().isEmpty ? true : (name.contains(q) || dosage.contains(q));
+      final matchesText = _search.trim().isEmpty ? true : (
+        name.contains(q) || 
+        nameEs.contains(q) || 
+        nameEn.contains(q) || 
+        namePt.contains(q) || 
+        nameFr.contains(q) || 
+        nameJa.contains(q) || 
+        dosage.contains(q)
+      );
 
       // Parse price like "15000" or "\$15.000" -> 15000
       int parsePrice(String? priceStr) {
@@ -141,7 +159,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Si el usuario toca el botón Estado (índice 1), navegar a la pantalla de estado de pedido
     if (index == 1) {
       // Si no hay pedido reciente mostramos un estado por defecto
-      Navigator.push(context, MaterialPageRoute(builder: (_) => EstadoPedidoScreen(orderId: '0', status: 'Sin pedidos')));
+      final t = AppLocalizations.of(context);
+      Navigator.push(context, MaterialPageRoute(builder: (_) => EstadoPedidoScreen(orderId: '0', status: t?.noOrders ?? 'Sin pedidos')));
     }
     // Si el usuario toca Perfil (índice 3), navegar a la pantalla de perfil
     else if (index == 3) {
@@ -616,11 +635,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 valueListenable: ProductService.instance.products,
                 builder: (context, _, __) {
                   final list = _filteredMedications;
+                  final currentLocale = Localizations.localeOf(context).languageCode;
                   return ListView.builder(
                     itemCount: list.length,
                     itemBuilder: (context, index) {
                       final m = list[index];
-                      return _buildMedicationCard(m['name'] ?? '', m['dosage'] ?? '', m['price'] ?? '', m['quantity'] ?? '0', index);
+                      final productName = ProductService.instance.getProductName(m, currentLocale);
+                      return _buildMedicationCard(productName, m['dosage'] ?? '', m['price'] ?? '', m['quantity'] ?? '0', index, m);
                     },
                   );
                 },
@@ -669,7 +690,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildMedicationCard(String name, String dosage, String price, String quantity, int index) {
+  Widget _buildMedicationCard(String name, String dosage, String price, String quantity, int index, Map<String, String> product) {
     final t = AppLocalizations.of(context);
     final q = int.tryParse(quantity.toString()) ?? 0;
     final isAdmin = AuthService.instance.currentUser.value?.isAdmin ?? false;
@@ -705,13 +726,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.productUnavailable ?? 'Producto no disponible')));
                 return;
               }
-              final item = {
-                'name': name,
-                'dosage': dosage,
-                'price': price,
-                'quantity': quantity,
-                'description': 'Use según indicación del profesional de la salud. Mantener fuera del alcance de los niños.'
-              };
+              // Pasar el producto completo con todos los nombres de idiomas
+              final item = Map<String, String>.from(product);
+              if (!item.containsKey('description')) {
+                item['description'] = 'Use según indicación del profesional de la salud. Mantener fuera del alcance de los niños.';
+              }
               Navigator.push(context, MaterialPageRoute(builder: (_) => ProductScreen(product: item)));
             },
             borderRadius: BorderRadius.circular(16),
@@ -776,7 +795,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.productOutOfStock ?? 'Producto sin stock')));
                             return;
                           }
-                          CartService.instance.addItem(CartItem(name: name, price: price, quantity: 1));
+                          CartService.instance.addItem(CartItem(name: name, price: price, quantity: 1, maxStock: q));
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.addedToCart ?? 'Agregado al carrito')));
                         },
                         borderRadius: BorderRadius.circular(8),
@@ -816,37 +835,387 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildLocalesView() {
     final t = AppLocalizations.of(context);
-    return ValueListenableBuilder(
-      valueListenable: DistributionService.instance.info,
-      builder: (context, info, _) {
-        if (info == null) return Center(child: Text(t?.noStoreInfo ?? 'No hay información de locales'));
+    return ValueListenableBuilder<List<DistributionInfo>>(
+      valueListenable: DistributionService.instance.points,
+      builder: (context, points, _) {
+        if (points.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: Duration(milliseconds: 600),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, v, child) {
+                    return Opacity(
+                      opacity: v,
+                      child: Transform.scale(
+                        scale: 0.8 + (0.2 * v),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFEEF7FF), Color(0xFFDCEEFF)],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xFF4A90E2).withValues(alpha: 0.2),
+                          blurRadius: 20,
+                          offset: Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.store_mall_directory_outlined,
+                      size: 64,
+                      color: Color(0xFF4A90E2),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 24),
+                Text(
+                  t?.noStoreInfo ?? 'No hay información de locales',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(t?.localesTitle ?? 'Locales', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
-            SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(info.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
-                    Text('${t?.addressLabel ?? 'Dirección'}: ${info.address}'),
-                    SizedBox(height: 4),
-                    Text('${t?.scheduleLabel ?? 'Horario'}: ${info.openingHours}'),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Text('${t?.availabilityLabel ?? 'Disponibilidad'}: '),
-                        Icon(info.available ? Icons.check_circle : Icons.cancel, color: info.available ? Colors.green : Colors.red),
-                        SizedBox(width: 8),
-                        Text(info.available ? (t?.available ?? 'Disponible') : (t?.notAvailable ?? 'No disponible')),
+            // Encabezado de la sección
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFEEF7FF), Color(0xFFDCEEFF)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xFF4A90E2).withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                    child: Icon(Icons.store, color: Colors.white, size: 28),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          t?.localesTitle ?? 'Locales',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF123A5A),
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          '${points.length} ${t?.localesSubtitle ?? 'locales disponibles'}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+            // Lista de locales
+            Expanded(
+              child: ListView.builder(
+                itemCount: points.length,
+                itemBuilder: (context, index) {
+                  final store = points[index];
+                  final isActive = DistributionService.instance.info.value?.name == store.name;
+                  
+                  return TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: Duration(milliseconds: 400 + (index * 100)),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, v, child) {
+                      return Opacity(
+                        opacity: v,
+                        child: Transform.translate(
+                          offset: Offset(0, 20 * (1 - v)),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isActive 
+                            ? [Color(0xFFEEF7FF), Color(0xFFDCEEFF)]
+                            : [Colors.white, Color(0xFFFAFDFF)],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isActive 
+                            ? Color(0xFF4A90E2).withValues(alpha: 0.5)
+                            : Colors.grey.withValues(alpha: 0.1),
+                          width: isActive ? 2 : 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isActive
+                              ? Color(0xFF4A90E2).withValues(alpha: 0.15)
+                              : Colors.black.withValues(alpha: 0.04),
+                            blurRadius: isActive ? 15 : 10,
+                            offset: Offset(0, isActive ? 6 : 4),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            // Cambiar el local activo
+                            DistributionService.instance.setInfo(store);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${t?.storeSelected ?? 'Local seleccionado'}: ${store.name}'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 56,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: isActive 
+                                            ? [Color(0xFF4A90E2), Color(0xFF3B82F6)]
+                                            : [Color(0xFFEEF7FF), Color(0xFFDCEEFF)],
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.storefront,
+                                          color: isActive ? Colors.white : Color(0xFF4A90E2),
+                                          size: 28,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  store.name,
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color(0xFF123A5A),
+                                                  ),
+                                                ),
+                                              ),
+                                              if (isActive)
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                                  decoration: BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                      colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)],
+                                                    ),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Icon(Icons.check, color: Colors.white, size: 14),
+                                                      SizedBox(width: 4),
+                                                      Text(
+                                                        t?.active ?? 'Activo',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 12,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 4),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              gradient: store.available
+                                                ? LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)])
+                                                : LinearGradient(colors: [Color(0xFFF44336), Color(0xFFEF5350)]),
+                                              borderRadius: BorderRadius.circular(12),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: (store.available ? Colors.green : Colors.red).withValues(alpha: 0.3),
+                                                  blurRadius: 4,
+                                                  offset: Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Text(
+                                              store.available ? (t?.available ?? 'Disponible') : (t?.notAvailable ?? 'No disponible'),
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 16),
+                                Divider(height: 1, color: Colors.grey.withValues(alpha: 0.2)),
+                                SizedBox(height: 16),
+                                // Dirección
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFFEEF7FF),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        Icons.location_on,
+                                        color: Color(0xFF4A90E2),
+                                        size: 20,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            t?.addressLabel ?? 'Dirección',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          SizedBox(height: 2),
+                                          Text(
+                                            store.address,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Color(0xFF123A5A),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 12),
+                                // Horario
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFFEEF7FF),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        Icons.access_time,
+                                        color: Color(0xFF4A90E2),
+                                        size: 20,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            t?.scheduleLabel ?? 'Horario',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          SizedBox(height: 2),
+                                          Text(
+                                            store.openingHours,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Color(0xFF123A5A),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],

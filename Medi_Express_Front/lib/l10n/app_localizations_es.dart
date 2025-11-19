@@ -30,6 +30,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get adminPanelTitle => 'Panel Admin';
 
   @override
+  String get adminSubtitle => 'Gestión de productos y locales';
+
+  @override
   String get logoutTitle => 'Cerrar sesión';
 
   @override
@@ -49,6 +52,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get languageSectionTitle => 'Idioma / Language';
+
+  @override
+  String get languageSubtitle => 'Selecciona tu idioma preferido';
+
+  @override
+  String get systemLanguageSubtitle => 'Detectar automáticamente';
 
   @override
   String get useSystemLanguage => 'Usar idioma del sistema';
@@ -94,6 +103,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get localesTitle => 'Locales';
+
+  @override
+  String get localesSubtitle => 'locales disponibles';
+
+  @override
+  String get storeSelected => 'Local seleccionado';
+
+  @override
+  String get active => 'Activo';
 
   @override
   String get noStoreInfo => 'No hay información de locales';
@@ -190,6 +208,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get orderStatusTitle => 'Estado del pedido';
+
+  @override
+  String get orderStatusSubtitle => 'Seguimiento de tu pedido';
+
+  @override
+  String get noOrders => 'Sin pedidos';
 
   @override
   String orderLabel(Object orderId) {
@@ -359,6 +383,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get editProfileTitle => 'Editar perfil';
+
+  @override
+  String get profileSubtitle => 'Actualiza tu información personal';
+
+  @override
+  String get personalInfoSection => 'Información Personal';
 
   @override
   String get fullNameLabel => 'Nombre completo';

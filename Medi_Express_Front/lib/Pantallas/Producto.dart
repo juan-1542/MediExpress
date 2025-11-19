@@ -5,7 +5,7 @@ import 'package:medi_express_front/Servicios/auth_service.dart';
 
 class ProductScreen extends StatefulWidget {
   final Map<String, String> product;
-  const ProductScreen({Key? key, required this.product}) : super(key: key);
+  const ProductScreen({super.key, required this.product});
 
   @override
   State<ProductScreen> createState() => _ProductScreenState();
@@ -37,8 +37,9 @@ class _ProductScreenState extends State<ProductScreen> {
 
   void _increment() => setState(() {
     if (_availableStock <= 0) return; // no stock
-    if (_quantity < _availableStock) _quantity++;
-    else {
+    if (_quantity < _availableStock) {
+      _quantity++;
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No hay suficiente stock')));
     }
   });
@@ -164,32 +165,41 @@ class _ProductScreenState extends State<ProductScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 86,
-                    height: 86,
-                    decoration: BoxDecoration(
-                      color: Color(0xFFE8F9FF),
-                      borderRadius: BorderRadius.circular(12),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: Offset(0, 6))],
+                ),
+                padding: EdgeInsets.all(12),
+                margin: EdgeInsets.only(bottom: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 86,
+                      height: 86,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: [Color(0xFFBEEFFB), Color(0xFF7EC8E3)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(child: Icon(Icons.medication, color: Color(0xFF4A90E2), size: 40)),
                     ),
-                    child: Center(child: Icon(Icons.medication, color: Color(0xFF7EC8E3), size: 40)),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(name, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
-                        SizedBox(height: 6),
-                        Text(dosage, style: TextStyle(color: Colors.grey[800], fontSize: 14)),
-                        SizedBox(height: 8),
-                        Text(price, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
-                      ],
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(name, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+                          SizedBox(height: 6),
+                          Text(dosage, style: TextStyle(color: Colors.grey[800], fontSize: 14)),
+                          SizedBox(height: 8),
+                          Text(price, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               SizedBox(height: 20),
               Text('Indicaciones de uso', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF123A5A))),
@@ -239,9 +249,16 @@ class _ProductScreenState extends State<ProductScreen> {
                   itemCount: _otherProducts.length,
                   itemBuilder: (context, index) {
                     final item = _otherProducts[index];
-                    // opcional: omitir el producto actual si coincide el nombre
                     if ((item['name'] ?? '') == name) return SizedBox.shrink();
-                    return _buildSuggestionCard(item);
+                    return Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: Offset(0, 4))],
+                      ),
+                      margin: EdgeInsets.only(right: 10),
+                      child: _buildSuggestionCard(item),
+                    );
                   },
                 ),
               ),

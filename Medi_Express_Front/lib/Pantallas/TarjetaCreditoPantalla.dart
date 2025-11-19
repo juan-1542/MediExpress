@@ -12,15 +12,15 @@ class ExpiryDateInputFormatter extends TextInputFormatter {
     if (digits.length > 4) digits = digits.substring(0, 4);
 
     String formatted;
-    if (digits.length == 0) {
+    if (digits.isEmpty) {
       formatted = '';
     } else if (digits.length == 1) {
       formatted = digits;
     } else if (digits.length == 2) {
       // insertar la barra inmediatamente después de MM
-      formatted = digits + '/';
+      formatted = '$digits/';
     } else {
-      formatted = digits.substring(0, 2) + '/' + digits.substring(2);
+      formatted = '${digits.substring(0, 2)}/${digits.substring(2)}';
     }
 
     // Mover el cursor al final para comportamiento sencillo y predecible
@@ -34,7 +34,7 @@ class ExpiryDateInputFormatter extends TextInputFormatter {
 }
 
 class TarjetaCreditoPantalla extends StatefulWidget {
-  const TarjetaCreditoPantalla({Key? key}) : super(key: key);
+  const TarjetaCreditoPantalla({super.key});
 
   @override
   State<TarjetaCreditoPantalla> createState() => _TarjetaCreditoPantallaState();
@@ -62,8 +62,9 @@ class _TarjetaCreditoPantallaState extends State<TarjetaCreditoPantalla> {
       if (args is Map) {
         if (args.containsKey('monto')) {
           final m = args['monto'];
-          if (m is int) _monto = m.toDouble();
-          else if (m is double) _monto = m;
+          if (m is int) {
+            _monto = m.toDouble();
+          } else if (m is double) _monto = m;
           else if (m is String) {
             final parsed = double.tryParse(m);
             if (parsed != null) _monto = parsed;

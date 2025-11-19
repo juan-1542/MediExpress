@@ -6,7 +6,7 @@ import '../Servicios/cart_service.dart';
 import '../Servicios/distribution_service.dart';
 
 class PagoPantalla extends StatefulWidget {
-  const PagoPantalla({Key? key}) : super(key: key);
+  const PagoPantalla({super.key});
 
   @override
   State<PagoPantalla> createState() => _PagoPantallaState();
@@ -103,7 +103,7 @@ class _PagoPantallaState extends State<PagoPantalla> {
         count = 0;
       }
     }
-    return '\$' + buffer.toString().split('').reversed.join('');
+    return '\$${buffer.toString().split('').reversed.join('')}';
   }
 
   int get _total => _articulos.fold(0, (s, a) => s + _parsePrice(a['price'] ?? a['precio'] ?? a['valor'] ?? 0));

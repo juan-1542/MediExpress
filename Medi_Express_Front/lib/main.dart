@@ -7,7 +7,6 @@ import 'Pantallas/TarjetaDebitoPantalla.dart';
 import 'Pantallas/EfectivoPantalla.dart';
 import 'Pantallas/Estado_Pedido.dart';
 import 'Servicios/locale_service.dart';
-import 'widgets/language_selector.dart';
 
 void main() {
   runApp(const MyApp());

@@ -4,7 +4,7 @@ import 'package:medi_express_front/Servicios/auth_service.dart';
 class EditProfileScreen extends StatefulWidget {
   final AppUser? initialUser;
 
-  const EditProfileScreen({Key? key, this.initialUser}) : super(key: key);
+  const EditProfileScreen({super.key, this.initialUser});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -67,71 +67,166 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Editar perfil'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(80.0),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF4A90E2), Color(0xFF7EC8E3)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: Text('Editar perfil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+            iconTheme: IconThemeData(color: Colors.white),
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(labelText: 'Nombre completo', prefixIcon: Icon(Icons.person)),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa el nombre' : null,
-                ),
-                SizedBox(height: 12),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(labelText: 'Correo', prefixIcon: Icon(Icons.email)),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Ingresa el correo';
-                    if (!RegExp(r"^[\w.-]+@([\w-]+\.)+[\w-]{2,4}").hasMatch(v)) return 'Ingresa un correo válido';
-                    return null;
-                  },
-                ),
-                SizedBox(height: 12),
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: InputDecoration(labelText: 'Teléfono', prefixIcon: Icon(Icons.phone)),
-                  keyboardType: TextInputType.phone,
-                ),
-                SizedBox(height: 12),
-                TextFormField(
-                  controller: _addressController,
-                  decoration: InputDecoration(labelText: 'Dirección', prefixIcon: Icon(Icons.location_on)),
-                ),
-                SizedBox(height: 12),
-                TextFormField(
-                  controller: _avatarController,
-                  decoration: InputDecoration(labelText: 'URL avatar (opcional)', prefixIcon: Icon(Icons.image)),
-                  keyboardType: TextInputType.url,
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _loading ? null : () => Navigator.pop(context, false),
-                        child: Text('Cancelar'),
+          padding: const EdgeInsets.all(20.0),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: Offset(0, 8))],
+            ),
+            padding: EdgeInsets.all(18),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Nombre completo',
+                      prefixIcon: Icon(Icons.person, color: Color(0xFF4A90E2)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2)),
                       ),
                     ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _loading ? null : _save,
-                        child: _loading ? SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Guardar'),
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa el nombre' : null,
+                  ),
+                  SizedBox(height: 16),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Correo',
+                      prefixIcon: Icon(Icons.email, color: Color(0xFF4A90E2)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2)),
                       ),
                     ),
-                  ],
-                )
-              ],
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return 'Ingresa el correo';
+                      if (!RegExp(r"^[\w.-]+@([\w-]+\.)+[\w-]{2,4}").hasMatch(v)) return 'Ingresa un correo válido';
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  TextFormField(
+                    controller: _phoneController,
+                    decoration: InputDecoration(
+                      labelText: 'Teléfono',
+                      prefixIcon: Icon(Icons.phone, color: Color(0xFF4A90E2)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2)),
+                      ),
+                    ),
+                    keyboardType: TextInputType.phone,
+                  ),
+                  SizedBox(height: 16),
+                  TextFormField(
+                    controller: _addressController,
+                    decoration: InputDecoration(
+                      labelText: 'Dirección',
+                      prefixIcon: Icon(Icons.location_on, color: Color(0xFF4A90E2)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2)),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextFormField(
+                    controller: _avatarController,
+                    decoration: InputDecoration(
+                      labelText: 'URL avatar (opcional)',
+                      prefixIcon: Icon(Icons.image, color: Color(0xFF4A90E2)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2)),
+                      ),
+                    ),
+                    keyboardType: TextInputType.url,
+                  ),
+                  SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _loading ? null : () => Navigator.pop(context, false),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 14),
+                            side: BorderSide(color: Color(0xFF4A90E2)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text('Cancelar', style: TextStyle(color: Color(0xFF4A90E2))),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _loading ? null : _save,
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: Color(0xFF4A90E2),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 4,
+                            shadowColor: Color(0xFF4A90E2).withOpacity(0.3),
+                          ),
+                          child: _loading ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Guardar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         ),

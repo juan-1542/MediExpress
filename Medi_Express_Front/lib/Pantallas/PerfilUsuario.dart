@@ -1,91 +1,46 @@
+
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
 import 'Login.dart';
-import 'EditProfile.dart';
-import 'ChangePassword.dart';
 
-// Pantalla: Perfil del Usuario
-// StatefulWidget que muestra datos del usuario recibidos desde un objeto User simulado.
-
-// Ahora usamos AppUser desde AuthService
 class PerfilUsuarioScreen extends StatefulWidget {
-  const PerfilUsuarioScreen({Key? key}) : super(key: key);
+  final dynamic usuario;
+  const PerfilUsuarioScreen({Key? key, required this.usuario}) : super(key: key);
 
   @override
-  _PerfilUsuarioScreenState createState() => _PerfilUsuarioScreenState();
+  State<PerfilUsuarioScreen> createState() => _PerfilUsuarioScreenState();
 }
 
 class _PerfilUsuarioScreenState extends State<PerfilUsuarioScreen> {
-  AppUser? user;
-
-  @override
-  void initState() {
-    super.initState();
-    // Suscribirse al currentUser para actualizar la UI automáticamente
-    user = AuthService.instance.currentUser.value;
-    AuthService.instance.currentUser.addListener(_onUserChanged);
-  }
-
-  @override
-  void dispose() {
-    AuthService.instance.currentUser.removeListener(_onUserChanged);
-    super.dispose();
-  }
-
-  void _onUserChanged() {
-    setState(() {
-      user = AuthService.instance.currentUser.value;
-    });
-  }
-
-  void _onEditProfile() {
-    // Abrir pantalla de edición pasando el usuario actual
-    Navigator.push(context, MaterialPageRoute(builder: (_) => EditProfileScreen(initialUser: user))).then((v) {
-      if (v == true) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Perfil actualizado')));
-      }
-    });
-  }
-
-  void _onChangePassword() {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => ChangePasswordScreen())).then((v) {
-      if (v == true) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Contraseña actualizada')));
-      }
-    });
-  }
-
-  void _onLogout() {
-    AuthService.instance.logout();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sesión cerrada')));
-  }
-
-  Widget _buildInfoCard(IconData icon, String title, String subtitle) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 1,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.blue.shade50,
-          child: Icon(icon, color: Colors.blue.shade700),
-        ),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text(subtitle),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final background = Color(0xFFF4F7FB);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Perfil del Usuario'),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(80.0),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF4A90E2), Color(0xFF7EC8E3)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: Text('Perfil del Usuario', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+            iconTheme: IconThemeData(color: Colors.white),
+          ),
+        ),
       ),
       backgroundColor: background,
       body: SafeArea(
@@ -93,95 +48,81 @@ class _PerfilUsuarioScreenState extends State<PerfilUsuarioScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               Center(
-                child: user == null ? _buildLoggedOutView(context) : Column(
+                child: Column(
                   children: [
                     CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Colors.blue.shade100,
-                      backgroundImage: user!.avatarUrl != null ? NetworkImage(user!.avatarUrl!) : null,
-                      child: user!.avatarUrl == null
-                          ? Text(
-                              _initials(user!.fullName),
-                              style: TextStyle(fontSize: 28, color: Colors.blue.shade700, fontWeight: FontWeight.w700),
-                            )
-                          : null,
+                      radius: 56,
+                      backgroundColor: Colors.white,
+                      child: Icon(Icons.person, size: 48, color: Color(0xFF4A90E2)),
                     ),
-                    const SizedBox(height: 12),
-                    Text(user!.fullName, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text(user!.email, style: theme.textTheme.bodyMedium?.copyWith(color: Colors.black54)),
+                    const SizedBox(height: 16),
+                    Text(widget.usuario.nombre, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Color(0xFF123A5A))),
+                    const SizedBox(height: 8),
+                    Text(widget.usuario.email, style: TextStyle(color: Colors.grey[600], fontSize: 16)),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 20),
-
-              // Información en Cards/ListTiles
-              if (user != null) ...[
-                _buildInfoCard(Icons.email_outlined, 'Correo electrónico', user!.email),
-                _buildInfoCard(Icons.phone_android_outlined, 'Teléfono', user!.phone),
-                _buildInfoCard(Icons.location_on_outlined, 'Dirección', user!.address),
-
-                const SizedBox(height: 20),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          icon: Icon(Icons.edit_outlined),
-                          label: const Text('Editar perfil'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade700,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          onPressed: _onEditProfile,
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 14, offset: Offset(0, 8))],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Cédula: ${widget.usuario.cedula}', style: TextStyle(fontSize: 16)),
+                        SizedBox(height: 6),
+                        Text('Teléfono: ${widget.usuario.telefono}', style: TextStyle(fontSize: 16)),
+                        SizedBox(height: 6),
+                        Text('Dirección: ${widget.usuario.direccion}', style: TextStyle(fontSize: 16)),
+                        SizedBox(height: 18),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {/* TODO: Implementar editar perfil */},
+                                icon: Icon(Icons.edit),
+                                label: Text('Editar'),
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(vertical: 12),
+                                  backgroundColor: Color(0xFF4A90E2),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  elevation: 4,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {/* TODO: Implementar cerrar sesión */},
+                                icon: Icon(Icons.logout),
+                                label: Text('Cerrar sesión'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.redAccent,
+                                  foregroundColor: Colors.white,
+                                  padding: EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  elevation: 4,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          icon: Icon(Icons.lock_outline),
-                          label: const Text('Cambiar contraseña'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.blue.shade700,
-                            side: BorderSide(color: Colors.blue.shade100),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          onPressed: _onChangePassword,
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextButton.icon(
-                          icon: Icon(Icons.exit_to_app, color: Colors.redAccent),
-                          label: const Text('Cerrar sesión', style: TextStyle(color: Colors.redAccent)),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            backgroundColor: Colors.white,
-                          ),
-                          onPressed: _onLogout,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ],
-
-              const SizedBox(height: 30),
+              ),
+              const SizedBox(height: 32),
             ],
           ),
         ),

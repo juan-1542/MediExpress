@@ -4,7 +4,7 @@ import '../Servicios/cart_service.dart';
 import 'Estado_Pedido.dart';
 
 class EfectivoPantalla extends StatefulWidget {
-  const EfectivoPantalla({Key? key}) : super(key: key);
+  const EfectivoPantalla({super.key});
 
   @override
   State<EfectivoPantalla> createState() => _EfectivoPantallaState();
@@ -29,8 +29,9 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
     if (args is Map) {
       final m = args['monto'];
       try {
-        if (m is int) _monto = m;
-        else if (m is double) _monto = (m).toInt();
+        if (m is int) {
+          _monto = m;
+        } else if (m is double) _monto = (m).toInt();
         else if (m is String) _monto = int.tryParse(m.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
       } catch (_) {}
       final arts = args['articulos'];
@@ -62,7 +63,7 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
         count = 0;
       }
     }
-    return '\$' + buffer.toString().split('').reversed.join('');
+    return '\$${buffer.toString().split('').reversed.join('')}';
   }
 
   @override
@@ -142,8 +143,8 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
                                       }
                                       await _procesarPago(entered);
                                     },
-                                    child: const Text('Necesitaré cambio'),
                                     style: ElevatedButton.styleFrom(backgroundColor: azulFondo),
+                                    child: const Text('Necesitaré cambio'),
                                   ),
                                   const SizedBox(height: 10),
                                 ],
@@ -158,8 +159,8 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
                                     final entered2 = _parseInput(_amountController.text);
                                     await _procesarPago(entered2);
                                   },
-                                  child: const Text('Aceptar pago'),
                                   style: ElevatedButton.styleFrom(backgroundColor: azulFondo),
+                                  child: const Text('Aceptar pago'),
                                 ),
                               ],
                             );
@@ -180,7 +181,7 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
                                 title: Text(name),
                                 trailing: Text(_formatCop((price is int) ? price : int.tryParse(price.toString().replaceAll(RegExp(r'[^0-9]'), '')) ?? 0)),
                               );
-                            }).toList(),
+                            }),
                         ],
                       ),
                     )

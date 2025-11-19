@@ -10,14 +10,14 @@ class ExpiryDateInputFormatter extends TextInputFormatter {
     String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
     if (digits.length > 4) digits = digits.substring(0, 4);
     String formatted;
-    if (digits.length == 0) {
+    if (digits.isEmpty) {
       formatted = '';
     } else if (digits.length == 1) {
       formatted = digits;
     } else if (digits.length == 2) {
-      formatted = digits + '/';
+      formatted = '$digits/';
     } else {
-      formatted = digits.substring(0, 2) + '/' + digits.substring(2);
+      formatted = '${digits.substring(0, 2)}/${digits.substring(2)}';
     }
     final selectionIndex = formatted.length;
     return TextEditingValue(
@@ -28,7 +28,7 @@ class ExpiryDateInputFormatter extends TextInputFormatter {
 }
 
 class TarjetaDebitoPantalla extends StatefulWidget {
-  const TarjetaDebitoPantalla({Key? key}) : super(key: key);
+  const TarjetaDebitoPantalla({super.key});
 
   @override
   State<TarjetaDebitoPantalla> createState() => _TarjetaDebitoPantallaState();
@@ -56,8 +56,9 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
       if (args is Map) {
         if (args.containsKey('monto')) {
           final m = args['monto'];
-          if (m is int) _monto = m.toDouble();
-          else if (m is double) _monto = m;
+          if (m is int) {
+            _monto = m.toDouble();
+          } else if (m is double) _monto = m;
           else if (m is String) {
             final parsed = double.tryParse(m);
             if (parsed != null) _monto = parsed;

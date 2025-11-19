@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/cart_service.dart';
 
 class CarritoScreen extends StatefulWidget {
-  const CarritoScreen({Key? key}) : super(key: key);
+  const CarritoScreen({super.key});
 
   @override
   State<CarritoScreen> createState() => _CarritoScreenState();
@@ -27,7 +27,7 @@ class _CarritoScreenState extends State<CarritoScreen> {
         count = 0;
       }
     }
-    return '\$' + buffer.toString().split('').reversed.join('');
+    return '\$${buffer.toString().split('').reversed.join('')}';
   }
 
   @override
@@ -60,10 +60,12 @@ class _CarritoScreenState extends State<CarritoScreen> {
                       final it = items[index];
                       final unit = _parsePrice(it.price);
                       final subtotal = unit * it.quantity;
-                      return Material(
-                        color: Colors.white,
-                        elevation: 2,
-                        borderRadius: BorderRadius.circular(12),
+                      return Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: Offset(0, 6))],
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: Row(
@@ -71,13 +73,16 @@ class _CarritoScreenState extends State<CarritoScreen> {
                               Container(
                                 width: 56,
                                 height: 56,
-                                decoration: BoxDecoration(color: Color(0xFFE8F9FF), borderRadius: BorderRadius.circular(8)),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(colors: [Color(0xFFBEEFFB), Color(0xFF7EC8E3)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                                 child: it.image != null
                                     ? ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(it.image!, fit: BoxFit.cover),
                                       )
-                                    : Icon(Icons.medication, color: Color(0xFF7EC8E3)),
+                                    : Icon(Icons.medication, color: Color(0xFF4A90E2)),
                               ),
                               SizedBox(width: 12),
                               Expanded(
@@ -106,12 +111,20 @@ class _CarritoScreenState extends State<CarritoScreen> {
                   ),
                 ),
                 SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Total', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(_formatPrice(total), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
-                  ],
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [Color(0xFFEEF7FF), Color(0xFFDCEEFF)]),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                  margin: EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+                      Text(_formatPrice(total), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
+                    ],
+                  ),
                 ),
                 SizedBox(height: 12),
                 Row(
@@ -129,15 +142,15 @@ class _CarritoScreenState extends State<CarritoScreen> {
 
                           Navigator.pushNamed(context, '/pago', arguments: args);
                         },
-                        child: Text('Ir a pagar'),
                         style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14)),
+                        child: Text('Ir a pagar'),
                       ),
                     ),
                     SizedBox(width: 12),
                     OutlinedButton(
                       onPressed: () => CartService.instance.clear(),
-                      child: Text('Vaciar carrito', style: TextStyle(color: Color(0xFF4A90E2))),
                       style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14)),
+                      child: Text('Vaciar carrito', style: TextStyle(color: Color(0xFF4A90E2))),
                     ),
                   ],
                 )

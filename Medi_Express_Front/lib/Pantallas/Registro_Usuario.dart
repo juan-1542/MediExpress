@@ -3,7 +3,7 @@ import 'package:medi_express_front/Servicios/auth_service.dart';
 import 'package:medi_express_front/Pantallas/Home.dart';
 
 class RegistroUsuarioScreen extends StatefulWidget {
-  const RegistroUsuarioScreen({Key? key}) : super(key: key);
+  const RegistroUsuarioScreen({super.key});
 
   @override
   State<RegistroUsuarioScreen> createState() => _RegistroUsuarioScreenState();
@@ -85,12 +85,14 @@ class _RegistroUsuarioScreenState extends State<RegistroUsuarioScreen> {
             Text('Regístrate para comprar más rápido y guardar tus datos', style: TextStyle(color: Color(0xFF6B7C87))),
             SizedBox(height: 18),
 
-            Material(
-              borderRadius: BorderRadius.circular(14),
-              color: Colors.white,
-              elevation: 2,
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: Offset(0, 8))],
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(18.0),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -147,7 +149,6 @@ class _RegistroUsuarioScreenState extends State<RegistroUsuarioScreen> {
                         validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa la dirección' : null,
                       ),
                       SizedBox(height: 12),
-                      // Selector tipo_usuario (Dropdown con dos opciones: cliente/admin)
                       DropdownButtonFormField<String>(
                         initialValue: _tipoUsuario,
                         decoration: InputDecoration(
@@ -176,8 +177,14 @@ class _RegistroUsuarioScreenState extends State<RegistroUsuarioScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _loading ? null : _submit,
-                          child: _loading ? SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : Text('Registrarse'),
-                          style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14)),
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: Color(0xFF4A90E2),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 4,
+                          ),
+                          child: _loading ? SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : Text('Registrarse', style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],

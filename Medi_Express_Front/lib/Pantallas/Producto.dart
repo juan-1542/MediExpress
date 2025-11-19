@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/cart_service.dart';
 import 'package:medi_express_front/Pantallas/Carrito.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
 
 class ProductScreen extends StatefulWidget {
   final Map<String, String> product;
@@ -16,7 +17,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
   int _availableStock = 0;
 
-  // Productos sugeridos: ahora incluyen una URL de imagen, nombre, precio y stock
+  // Productos sugeridos
   final List<Map<String, String>> _otherProducts = [
     {
       'name': 'Aspirina',
@@ -36,25 +37,27 @@ class _ProductScreenState extends State<ProductScreen> {
       'name': 'Antigripal',
       'price': '\$8.000',
       'image': 'https://via.placeholder.com/160x90.png?text=Antigripal',
-      'quantity': '0', // sin stock, no debe aparecer
+      'quantity': '0',
       'dosage': 'Tabletas'
     },
   ];
 
   void _increment() => setState(() {
-    if (_availableStock <= 0) return; // no stock
-    if (_quantity < _availableStock) {
-      _quantity++;
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No hay suficiente stock')));
-    }
-  });
+        if (_availableStock <= 0) return; // no stock
+        if (_quantity < _availableStock) {
+          _quantity++;
+        } else {
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.insufficientStock)));
+        }
+      });
   void _decrement() {
     if (_quantity > 1) setState(() => _quantity--);
   }
 
-  // Tarjeta de sugerencia (vertical) con manejo de errores de imagen y loader
+  // Tarjeta de sugerencia (vertical)
   Widget _buildSuggestionCard(Map<String, String> item) {
+    final l10n = AppLocalizations.of(context)!;
     final imageUrl = item['image'] ?? '';
     final qty = int.tryParse(item['quantity'] ?? '0') ?? 0;
     return GestureDetector(
@@ -62,11 +65,11 @@ class _ProductScreenState extends State<ProductScreen> {
         if (qty > 0) {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ProductScreen(product: item)));
         } else {
-          // No debería ocurrir porque filtramos, pero por seguridad
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto sin stock')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.productOutOfStock)));
         }
       },
-      child: Container(
+      child: Container
+(
         width: double.infinity,
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
@@ -127,9 +130,9 @@ class _ProductScreenState extends State<ProductScreen> {
                       style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0077B6), fontSize: 14),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Ver detalles',
-                      style: TextStyle(color: Color(0xFF4A90E2), fontSize: 13, fontWeight: FontWeight.w500, decoration: TextDecoration.underline),
+                    Text(
+                      l10n.viewDetails,
+                      style: const TextStyle(color: Color(0xFF4A90E2), fontSize: 13, fontWeight: FontWeight.w500, decoration: TextDecoration.underline),
                     ),
                   ],
                 ),
@@ -143,6 +146,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
   // Widget reutilizable de fallback para imagen
   Widget _fallbackImage({Object? error}) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: Colors.grey[200],
       alignment: Alignment.center,
@@ -151,9 +155,9 @@ class _ProductScreenState extends State<ProductScreen> {
         children: [
           const Icon(Icons.broken_image, color: Colors.grey, size: 40),
           if (error != null)
-            const Padding(
-              padding: EdgeInsets.only(top: 4.0),
-              child: Text('Imagen no disponible', style: TextStyle(fontSize: 10, color: Colors.grey)),
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Text(l10n.imageUnavailable, style: const TextStyle(fontSize: 10, color: Colors.grey)),
             )
         ],
       ),
@@ -171,7 +175,8 @@ class _ProductScreenState extends State<ProductScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final isAdmin = AuthService.instance.currentUser.value?.isAdmin ?? false;
       if (_availableStock <= 0 && !isAdmin) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto no disponible')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.productUnavailable)));
         Navigator.pop(context);
       }
     });
@@ -179,14 +184,15 @@ class _ProductScreenState extends State<ProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final p = widget.product;
-    final name = p['name'] ?? 'Producto';
+    final name = p['name'] ?? l10n.defaultProductName;
     final dosage = p['dosage'] ?? '';
     final price = p['price'] ?? '';
-    final description = p['description'] ?? 'Descripción no disponible para este producto.';
+    final description = p['description'] ?? l10n.descriptionUnavailable;
     final isAdmin = AuthService.instance.currentUser.value?.isAdmin ?? false;
 
-    // recalcular stock en build en caso de que el producto provenga de otra fuente
+    // recalcular stock
     _availableStock = int.tryParse(p['quantity'] ?? '0') ?? _availableStock;
 
     final addButtonEnabled = _availableStock > 0 && _quantity > 0 && _quantity <= _availableStock;
@@ -273,20 +279,20 @@ class _ProductScreenState extends State<ProductScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text('Indicaciones de uso', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF123A5A))),
+              Text(l10n.productUsageTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF123A5A))),
               const SizedBox(height: 8),
               Text(description, style: TextStyle(color: Colors.grey[800], height: 1.4, fontSize: 14)),
               const SizedBox(height: 16),
-              const Text('Detalles', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF123A5A))),
+              Text(l10n.productDetailsTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF123A5A))),
               const SizedBox(height: 8),
-              Text('- Dosis: $dosage', style: TextStyle(color: Colors.grey[800], fontSize: 14)),
+              Text('${l10n.adminProductDosage}: $dosage', style: TextStyle(color: Colors.grey[800], fontSize: 14)),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Text('Cantidad', style: TextStyle(fontSize: 16, color: Color(0xFF123A5A))),
+                  Text(l10n.quantityLabel, style: const TextStyle(fontSize: 16, color: Color(0xFF123A5A))),
                   const Spacer(),
                   Container(
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)]),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)]),
                     child: Row(
                       children: [
                         IconButton(onPressed: _decrement, icon: const Icon(Icons.remove, color: Color(0xFF4A90E2))),
@@ -299,20 +305,18 @@ class _ProductScreenState extends State<ProductScreen> {
               ),
               const SizedBox(height: 8),
               if (_availableStock <= 0)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                  child: Text('Producto no disponible', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                  child: Text(l10n.productUnavailable, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                 )
               else if (isAdmin)
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                  child: Text('Stock disponible: $_availableStock', style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.w600)),
+                  child: Text(l10n.availableStock(_availableStock), style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.w600)),
                 ),
               const SizedBox(height: 18),
-              // Sección: También puedes comprar (vertical)
-              const Text('También puedes comprar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF123A5A))),
+              Text(l10n.alsoBuyTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF123A5A))),
               const SizedBox(height: 12),
-              // Lista vertical integrada en el scroll principal, filtrando por stock > 0 y distinto nombre
               Builder(
                 builder: (context) {
                   final suggestions = _otherProducts
@@ -320,7 +324,7 @@ class _ProductScreenState extends State<ProductScreen> {
                       .where((item) => (int.tryParse(item['quantity'] ?? '0') ?? 0) > 0)
                       .toList();
                   if (suggestions.isEmpty) {
-                    return const Text('No hay sugerencias disponibles en este momento.', style: TextStyle(color: Colors.grey));
+                    return Text(l10n.noSuggestions, style: const TextStyle(color: Colors.grey));
                   }
                   return Column(
                     children: suggestions.map((item) => _buildSuggestionCard(item)).toList(),
@@ -328,7 +332,6 @@ class _ProductScreenState extends State<ProductScreen> {
                 },
               ),
               const SizedBox(height: 12),
-              // espacio para la barra inferior fija (botones)
               const SizedBox(height: 88),
               const SizedBox(height: 24),
             ],
@@ -347,11 +350,11 @@ class _ProductScreenState extends State<ProductScreen> {
                   onPressed: addButtonEnabled
                       ? () {
                           CartService.instance.addItem(CartItem(name: name, price: price, quantity: _quantity, image: p['image']));
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Añadido $_quantity x $name al carrito')));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.addedToCartItems(_quantity, name))));
                         }
                       : null,
                   icon: const Icon(Icons.add_shopping_cart),
-                  label: const Text('Añadir al carrito'),
+                  label: Text(l10n.addToCart),
                   style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
                 ),
               ),
@@ -359,7 +362,7 @@ class _ProductScreenState extends State<ProductScreen> {
               OutlinedButton(
                 onPressed: () => Navigator.pop(context),
                 style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                child: const Text('Volver', style: TextStyle(color: Color(0xFF4A90E2))),
+                child: Text(l10n.back, style: const TextStyle(color: Color(0xFF4A90E2))),
               ),
             ],
           ),

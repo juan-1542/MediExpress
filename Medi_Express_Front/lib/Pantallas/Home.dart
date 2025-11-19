@@ -12,6 +12,8 @@ import 'package:medi_express_front/Servicios/product_service.dart';
 import 'package:medi_express_front/Servicios/distribution_service.dart';
 import 'package:motion_tab_bar/MotionTabBar.dart';
 import 'package:motion_tab_bar/MotionTabBarController.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
+import 'package:medi_express_front/Pantallas/Configuraciones.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -33,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _showSuggestions = false;
   late FocusNode _searchFocusNode;
   bool _searchFocused = false;
+  late VoidCallback _focusNodeListener;
 
   @override
   void initState() {
@@ -45,11 +48,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _searchController = TextEditingController(text: _search);
     _searchController.addListener(_onSearchChanged);
     _searchFocusNode = FocusNode();
-    _searchFocusNode.addListener(() {
+    _focusNodeListener = () {
       setState(() {
         _searchFocused = _searchFocusNode.hasFocus;
       });
-    });
+    };
+    _searchFocusNode.addListener(_focusNodeListener);
   }
 
   @override
@@ -57,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _motionTabBarController.dispose();
     _searchController.removeListener(_onSearchChanged);
     _searchDebounce?.cancel();
-    _searchFocusNode.removeListener(() {});
+    _searchFocusNode.removeListener(_focusNodeListener);
     _searchFocusNode.dispose();
     _searchController.dispose();
     super.dispose();
@@ -141,13 +145,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _openProfileSlide() {
-    // Guardar el contexto del widget (padre) para usarlo después de cerrar el modal
     final parentContext = context;
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       backgroundColor: Colors.white,
       builder: (context) {
+        final t = AppLocalizations.of(context);
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -157,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               SizedBox(height: 16),
               ListTile(
                 leading: Icon(Icons.person_outline, color: Color(0xFF4A90E2)),
-                title: Text('Mi perfil', style: TextStyle(fontWeight: FontWeight.w600)),
+                title: Text(t?.profileTitle ?? 'Mi perfil', style: TextStyle(fontWeight: FontWeight.w600)),
                 onTap: () {
                   Navigator.pop(context);
                   final user = AuthService.instance.currentUser.value;
@@ -172,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               if (AuthService.instance.currentUser.value?.isAdmin ?? false)
                 ListTile(
                   leading: Icon(Icons.admin_panel_settings, color: Color(0xFF4A90E2)),
-                  title: Text('Panel Admin', style: TextStyle(fontWeight: FontWeight.w600)),
+                  title: Text(t?.adminPanelTitle ?? 'Panel Admin', style: TextStyle(fontWeight: FontWeight.w600)),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => AdminScreen()));
@@ -185,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   if (user != null) {
                     return ListTile(
                       leading: Icon(Icons.logout, color: Colors.redAccent),
-                      title: Text('Cerrar sesión', style: TextStyle(fontWeight: FontWeight.w600)),
+                      title: Text(t?.logoutTitle ?? 'Cerrar sesión', style: TextStyle(fontWeight: FontWeight.w600)),
                       onTap: () {
                         // Cerrar sesión en el servicio
                         AuthService.instance.logout();
@@ -198,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   }
                   return ListTile(
                     leading: Icon(Icons.login, color: Color(0xFF4A90E2)),
-                    title: Text('Iniciar Sesión', style: TextStyle(fontWeight: FontWeight.w600)),
+                    title: Text(t?.loginTitle ?? 'Iniciar Sesión', style: TextStyle(fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
@@ -208,10 +212,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               ListTile(
                 leading: Icon(Icons.settings, color: Color(0xFF4A90E2)),
-                title: Text('Configuraciones', style: TextStyle(fontWeight: FontWeight.w600)),
+                title: Text(t?.settingsTitle ?? 'Configuraciones', style: TextStyle(fontWeight: FontWeight.w600)),
                 onTap: () {
                   Navigator.pop(context);
-                  // navegar a configuraciones
+                  Navigator.push(parentContext, MaterialPageRoute(builder: (_) => const ConfiguracionesScreen()));
                 },
               ),
               SizedBox(height: 16),
@@ -231,6 +235,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       isScrollControlled: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
+        final t = AppLocalizations.of(context);
         return Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: SafeArea(
@@ -240,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Filtrar por precio', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(t?.filterByPrice ?? 'Filtrar por precio', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   SizedBox(height: 12),
                   Row(
                     children: [
@@ -248,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: TextField(
                           controller: minController,
                           keyboardType: TextInputType.number,
-                          decoration: InputDecoration(labelText: 'Precio mínimo (ej. 15000)'),
+                          decoration: InputDecoration(labelText: t?.minPriceHint ?? 'Precio mínimo (ej. 15000)'),
                         ),
                       ),
                       SizedBox(width: 12),
@@ -256,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: TextField(
                           controller: maxController,
                           keyboardType: TextInputType.number,
-                          decoration: InputDecoration(labelText: 'Precio máximo (ej. 25000)'),
+                          decoration: InputDecoration(labelText: t?.maxPriceHint ?? 'Precio máximo (ej. 25000)'),
                         ),
                       ),
                     ],
@@ -273,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           });
                           Navigator.pop(context);
                         },
-                        child: Text('Limpiar filtro'),
+                        child: Text(t?.commonClearFilter ?? 'Limpiar filtro'),
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
@@ -284,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           });
                           Navigator.pop(context);
                         },
-                        child: Text('Aplicar'),
+                        child: Text(t?.commonApply ?? 'Aplicar'),
                       ),
                     ],
                   ),
@@ -299,6 +304,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(80.0),
@@ -311,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 15,
                 offset: Offset(0, 6),
               ),
@@ -323,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             leading: Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: CircleAvatar(
-                backgroundColor: Colors.white.withOpacity(0.9),
+                backgroundColor: Colors.white.withValues(alpha: 0.9),
                 child: IconButton(
                   icon: Icon(Icons.person, color: Color(0xFF1E3A8A)),
                   onPressed: _openProfileSlide,
@@ -340,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       height: 18,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.white.withOpacity(0.8), Colors.white.withOpacity(0.6)],
+                          colors: [Colors.white.withValues(alpha: 0.8), Colors.white.withValues(alpha: 0.6)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -359,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22,
                               shadows: [
                                 Shadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   offset: Offset(0, 4),
                                 ),
@@ -369,11 +375,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 ShaderMask(
                   shaderCallback: (bounds) => LinearGradient(
-                    colors: [Colors.white.withOpacity(0.9), Colors.white.withOpacity(0.7)],
+                    colors: [Colors.white.withValues(alpha: 0.9), Colors.white.withValues(alpha: 0.7)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ).createShader(bounds),
-                  child: Text('Tu farmacia en minutos',
+                  child: Text(t?.homeSubtitle ?? 'Tu farmacia en minutos',
                       style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500)),
                 ),
               ],
@@ -439,7 +445,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(_searchFocused ? 0.08 : 0.04), blurRadius: _searchFocused ? 18 : 10, offset: Offset(0, 8)),
+                      color: Colors.black.withValues(alpha: _searchFocused ? 0.08 : 0.04), blurRadius: _searchFocused ? 18 : 10, offset: Offset(0, 8)),
                 ],
                 border: Border.all(color: _searchFocused ? Color(0xFFBEE1FF) : Colors.transparent),
               ),
@@ -464,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       controller: _searchController,
                       textInputAction: TextInputAction.search,
                       decoration: InputDecoration(
-                        hintText: 'Buscar medicamento, dosis o marca',
+                        hintText: t?.searchHint ?? 'Buscar medicamento, dosis o marca',
                         hintStyle: TextStyle(color: Color(0xFF9BB7D8)),
                         border: InputBorder.none,
                         isDense: true,
@@ -490,7 +496,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   Container(
                     margin: const EdgeInsets.only(right: 8.0),
                     child: IconButton(
-                      tooltip: 'Filtrar por precio',
+                      tooltip: t?.filterByPrice ?? 'Filtrar por precio',
                       icon: Icon(Icons.filter_list, color: (_minPrice != null || _maxPrice != null) ? Color(0xFF0077B6) : Color(0xFF4A90E2)),
                       onPressed: _openFilterSheet,
                     ),
@@ -504,25 +510,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip('Todos', () {
+                  _buildFilterChip(t?.filterAll ?? 'Todos', () {
                     setState(() {
                       _minPrice = null;
                       _maxPrice = null;
-                      _activeFilter = 'Todos';
+                      _activeFilter = t?.filterAll ?? 'Todos';
                     });
                   }),
-                  _buildFilterChip('Con stock', () {
+                  _buildFilterChip(t?.filterInStock ?? 'Con stock', () {
                     setState(() {
                       _minPrice = null;
                       _maxPrice = null;
-                      _activeFilter = 'Con stock';
+                      _activeFilter = t?.filterInStock ?? 'Con stock';
                     });
                   }),
-                  _buildFilterChip('Sin stock', () {
+                  _buildFilterChip(t?.filterOutOfStock ?? 'Sin stock', () {
                     setState(() {
                       _minPrice = null;
                       _maxPrice = null;
-                      _activeFilter = 'Sin stock';
+                      _activeFilter = t?.filterOutOfStock ?? 'Sin stock';
                     });
                   }),
                   _buildFilterChip('<15K', () {
@@ -582,9 +588,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
             SizedBox(height: 18),
-            // Título
             Text(
-              'Catálogo de medicamentos',
+              t?.catalogTitle ?? 'Catálogo de medicamentos',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A)),
             ),
             SizedBox(height: 12),
@@ -609,8 +614,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       bottomNavigationBar: MotionTabBar(
         controller: _motionTabBarController,
-        initialSelectedTab: "Inicio",
-        labels: const ["Inicio", "Estado", "Locales", "Perfil"],
+        initialSelectedTab: t?.tabHome ?? 'Inicio',
+        labels: [
+          t?.tabHome ?? 'Inicio',
+          t?.tabStatus ?? 'Estado',
+          t?.tabStores ?? 'Locales',
+          t?.tabProfile ?? 'Perfil',
+        ],
         icons: const [
           Icons.home,
           Icons.info_outline,
@@ -624,7 +634,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           color: Colors.white,
           fontWeight: FontWeight.w500,
         ),
-        tabIconColor: Colors.white.withOpacity(0.7),
+        tabIconColor: Colors.white.withValues(alpha: 0.7),
         tabIconSize: 28.0,
         tabIconSelectedSize: 26.0,
         tabSelectedColor: Colors.white,
@@ -641,6 +651,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildMedicationCard(String name, String dosage, String price, String quantity, int index) {
+    final t = AppLocalizations.of(context);
     final q = int.tryParse(quantity.toString()) ?? 0;
     final isAdmin = AuthService.instance.currentUser.value?.isAdmin ?? false;
     return TweenAnimationBuilder<double>(
@@ -661,14 +672,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: Offset(0, 8))],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: Offset(0, 8))],
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
               if (q <= 0 && !isAdmin) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto no disponible')));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.productUnavailable ?? 'Producto no disponible')));
                 return;
               }
               final item = {
@@ -692,7 +703,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(colors: [Color(0xFF9FE8FF), Color(0xFF67C8E8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: Offset(0, 6))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: Offset(0, 6))],
                     ),
                     child: Center(
                       child: Text(name.isNotEmpty ? name[0].toUpperCase() : 'M', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
@@ -712,14 +723,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             if (q <= 0)
                               Container(
                                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
-                                child: Text('Sin stock', style: TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.w600)),
+                                decoration: BoxDecoration(color: Colors.redAccent.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+                                child: Text(t?.productOutOfStock ?? 'Sin stock', style: TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.w600)),
                               )
                             else if (isAdmin)
                               Container(
                                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(color: Colors.green.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
-                                child: Text('Cantidad: $q', style: TextStyle(color: Colors.green[700], fontSize: 12, fontWeight: FontWeight.w600)),
+                                decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+                                child: Text(t?.quantityTag(q) ?? 'Cantidad: $q', style: TextStyle(color: Colors.green[700], fontSize: 12, fontWeight: FontWeight.w600)),
                               ),
                           ],
                         ),
@@ -739,11 +750,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       InkWell(
                         onTap: () {
                           if (q <= 0 && !isAdmin) {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto sin stock')));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.productOutOfStock ?? 'Producto sin stock')));
                             return;
                           }
                           CartService.instance.addItem(CartItem(name: name, price: price, quantity: 1));
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Agregado al carrito')));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.addedToCart ?? 'Agregado al carrito')));
                         },
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
@@ -772,8 +783,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           color: selected ? Color(0xFF1E3A8A) : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? Colors.transparent : Colors.grey.withOpacity(0.2)),
-          boxShadow: selected ? [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: Offset(0,4))] : [],
+          border: Border.all(color: selected ? Colors.transparent : Colors.grey.withValues(alpha: 0.2)),
+          boxShadow: selected ? [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: Offset(0,4))] : [],
         ),
         child: Text(label, style: TextStyle(color: selected ? Colors.white : Color(0xFF123A5A), fontWeight: FontWeight.w600)),
       ),
@@ -781,14 +792,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildLocalesView() {
+    final t = AppLocalizations.of(context);
     return ValueListenableBuilder(
       valueListenable: DistributionService.instance.info,
       builder: (context, info, _) {
-        if (info == null) return Center(child: Text('No hay información de locales'));
+        if (info == null) return Center(child: Text(t?.noStoreInfo ?? 'No hay información de locales'));
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Locales', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+            Text(t?.localesTitle ?? 'Locales', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
             SizedBox(height: 12),
             Card(
               child: Padding(
@@ -798,16 +810,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   children: [
                     Text(info.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     SizedBox(height: 8),
-                    Text('Dirección: ${info.address}'),
+                    Text('${t?.addressLabel ?? 'Dirección'}: ${info.address}'),
                     SizedBox(height: 4),
-                    Text('Horario: ${info.openingHours}'),
+                    Text('${t?.scheduleLabel ?? 'Horario'}: ${info.openingHours}'),
                     SizedBox(height: 8),
                     Row(
                       children: [
-                        Text('Disponibilidad: '),
+                        Text('${t?.availabilityLabel ?? 'Disponibilidad'}: '),
                         Icon(info.available ? Icons.check_circle : Icons.cancel, color: info.available ? Colors.green : Colors.red),
                         SizedBox(width: 8),
-                        Text(info.available ? 'Disponible' : 'No disponible'),
+                        Text(info.available ? (t?.available ?? 'Disponible') : (t?.notAvailable ?? 'No disponible')),
                       ],
                     ),
                   ],

@@ -37,6 +37,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   motion_tab_bar: ^2.0.4
+  intl: any
 
 
 dev_dependencies:

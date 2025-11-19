@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi_express_front/Pantallas/Registro_Usuario.dart';
 import 'package:medi_express_front/Pantallas/Home.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
 
   void _submit() {
+    final t = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     Future.delayed(Duration(milliseconds: 700), () {
@@ -25,11 +27,10 @@ class _LoginScreenState extends State<LoginScreen> {
       final password = _passwordController.text;
       final ok = AuthService.instance.loginWithCredentials(email, password);
       if (!ok) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Credenciales inválidas o usuario no registrado')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.invalidCredentials ?? 'Credenciales inválidas o usuario no registrado')));
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Inicio de sesión correcto')));
-      // Reemplazamos la pantalla actual por HomeScreen después de iniciar sesión
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.loginSuccess ?? 'Inicio de sesión correcto')));
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
     });
   }
@@ -42,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -57,7 +59,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Logo y título mejorado
                 SizedBox(height: 40),
                 AnimatedOpacity(
                   opacity: 1.0,
@@ -67,19 +68,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 100,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.white.withOpacity(0.9), Colors.white.withOpacity(0.7)],
+                        colors: [Colors.white.withValues(alpha: 0.9), Colors.white.withValues(alpha: 0.7)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 20,
                           offset: Offset(0, 10),
                         ),
                         BoxShadow(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           blurRadius: 10,
                           offset: Offset(-5, -5),
                         ),
@@ -98,19 +99,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     end: Alignment.bottomRight,
                   ).createShader(bounds),
                   child: Text(
-                    'MediExpress',
+                    (t?.appTitle ?? 'MediExpress'),
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       shadows: [
                         Shadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: Offset(0, 4),
                         ),
                         Shadow(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           blurRadius: 12,
                           offset: Offset(0, 0),
                         ),
@@ -121,12 +122,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 8),
                 ShaderMask(
                   shaderCallback: (bounds) => LinearGradient(
-                    colors: [Colors.white.withOpacity(0.9), Colors.white.withOpacity(0.7)],
+                    colors: [Colors.white.withValues(alpha: 0.9), Colors.white.withValues(alpha: 0.7)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ).createShader(bounds),
                   child: Text(
-                    'Tu farmacia en minutos',
+                    t?.homeSubtitle ?? 'Tu farmacia en minutos',
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white,
@@ -147,14 +148,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       end: Alignment.bottomRight,
                     ).createShader(bounds),
                     child: Text(
-                      'Iniciar sesión',
+                      t?.loginTitle ?? 'Iniciar sesión',
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         shadows: [
                           Shadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 6,
                             offset: Offset(0, 3),
                           ),
@@ -168,12 +169,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.centerLeft,
                   child: ShaderMask(
                     shaderCallback: (bounds) => LinearGradient(
-                      colors: [Colors.white.withOpacity(0.9), Colors.white.withOpacity(0.7)],
+                      colors: [Colors.white.withValues(alpha: 0.9), Colors.white.withValues(alpha: 0.7)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ).createShader(bounds),
                     child: Text(
-                      'Accede para ver tus pedidos y descuentos',
+                      t?.loginSubtitle ?? 'Accede para ver tus pedidos y descuentos',
                       style: TextStyle(
                         fontSize: 17,
                         color: Colors.white,
@@ -185,26 +186,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 32),
 
-                // Formulario mejorado
+                // Formulario
                 AnimatedOpacity(
                   opacity: 1.0,
                   duration: Duration(seconds: 1),
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.white.withOpacity(0.95), Colors.white.withOpacity(0.85)],
+                        colors: [Colors.white.withValues(alpha: 0.95), Colors.white.withValues(alpha: 0.85)],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
+                          color: Colors.black.withValues(alpha: 0.15),
                           blurRadius: 25,
                           offset: Offset(0, 15),
                         ),
                         BoxShadow(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           blurRadius: 15,
                           offset: Offset(-5, -5),
                         ),
@@ -218,12 +219,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextFormField(
                           controller: _userController,
                           decoration: InputDecoration(
-                            labelText: 'Correo o teléfono',
+                            labelText: t?.usernameOrPhone ?? 'Correo o teléfono',
                             labelStyle: TextStyle(color: Color(0xFF4A90E2)),
                             prefixIcon: Icon(Icons.person, color: Color(0xFF4A90E2)),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                              borderSide: BorderSide(color: Color(0xFF4A90E2).withValues(alpha: 0.3)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -232,19 +233,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             filled: true,
                             fillColor: Colors.white,
                           ),
-                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa correo o teléfono' : null,
+                          validator: (v) => (v == null || v.trim().isEmpty) ? (t?.enterUsernameOrPhone ?? 'Ingresa correo o teléfono') : null,
                         ),
                         SizedBox(height: 20),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: true,
                           decoration: InputDecoration(
-                            labelText: 'Contraseña',
+                            labelText: t?.password ?? 'Contraseña',
                             labelStyle: TextStyle(color: Color(0xFF4A90E2)),
                             prefixIcon: Icon(Icons.lock, color: Color(0xFF4A90E2)),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                              borderSide: BorderSide(color: Color(0xFF4A90E2).withValues(alpha: 0.3)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -253,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             filled: true,
                             fillColor: Colors.white,
                           ),
-                          validator: (v) => (v == null || v.isEmpty) ? 'Ingresa la contraseña' : null,
+                          validator: (v) => (v == null || v.isEmpty) ? (t?.enterPassword ?? 'Ingresa la contraseña') : null,
                         ),
                         SizedBox(height: 32),
                         SizedBox(
@@ -266,11 +267,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               elevation: 6,
-                              shadowColor: Color(0xFF4A90E2).withOpacity(0.4),
+                              shadowColor: Color(0xFF4A90E2).withValues(alpha: 0.4),
                             ),
                             child: _loading
                                 ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                : Text('Iniciar sesión', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                                : Text(t?.loginTitle ?? 'Iniciar sesión', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                           ),
                         ),
                         SizedBox(height: 16),
@@ -279,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => RegistroUsuarioScreen()));
                           },
                           child: Text(
-                            '¿No tienes cuenta? Regístrate',
+                            t?.noAccountRegister ?? '¿No tienes cuenta? Regístrate',
                             style: TextStyle(
                               color: Color(0xFF0077B6),
                               fontWeight: FontWeight.w600,
@@ -287,13 +288,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                        // Bloque de credenciales demo (si existen)
                         if (AuthService.instance.demoCredentials.isNotEmpty) ...[
                           SizedBox(height: 16),
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              'Credenciales de demo',
+                              t?.demoCredentials ?? 'Credenciales de demo',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF123A5A),
@@ -311,7 +311,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 decoration: BoxDecoration(
                                   color: Color(0xFFF5F9FB),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Color(0xFF4A90E2).withOpacity(0.2)),
+                                  border: Border.all(color: Color(0xFF4A90E2).withValues(alpha: 0.2)),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -325,11 +325,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       TextButton(
                                         onPressed: () => _useDemoCredential(c, submit: false),
-                                        child: Text('Usar', style: TextStyle(color: Color(0xFF0077B6), fontWeight: FontWeight.w600)),
+                                        child: Text(t?.use ?? 'Usar', style: TextStyle(color: Color(0xFF0077B6), fontWeight: FontWeight.w600)),
                                       ),
                                       TextButton(
                                         onPressed: () => _useDemoCredential(c, submit: true),
-                                        child: Text('Entrar', style: TextStyle(color: Color(0xFF0077B6), fontWeight: FontWeight.w600)),
+                                        child: Text(t?.enter ?? 'Entrar', style: TextStyle(color: Color(0xFF0077B6), fontWeight: FontWeight.w600)),
                                       ),
                                     ],
                                   ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
 
 // Uso opcional de servicio del proyecto para datos simulados (fallback)
 import '../Servicios/product_service.dart';
@@ -91,19 +93,9 @@ class _PagoPantallaState extends State<PagoPantalla> {
     return int.tryParse(digits) ?? 0;
   }
 
-  String _formatCop(int value) {
-    final s = value.toString();
-    final buffer = StringBuffer();
-    int count = 0;
-    for (int i = s.length - 1; i >= 0; i--) {
-      buffer.write(s[i]);
-      count++;
-      if (count == 3 && i != 0) {
-        buffer.write('.');
-        count = 0;
-      }
-    }
-    return '\$${buffer.toString().split('').reversed.join('')}';
+  String _formatCurrency(BuildContext context, int value) {
+    final l10n = AppLocalizations.of(context)!;
+    return NumberFormat.currency(locale: l10n.localeName, symbol: '\$', decimalDigits: 0).format(value);
   }
 
   int get _total => _articulos.fold(0, (s, a) => s + _parsePrice(a['price'] ?? a['precio'] ?? a['valor'] ?? 0));
@@ -180,6 +172,7 @@ class _PagoPantallaState extends State<PagoPantalla> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const azulFondo = Color(0xFF002B68);
 
     return Scaffold(
@@ -198,7 +191,7 @@ class _PagoPantallaState extends State<PagoPantalla> {
                       'assets/imagenes/upperblanco.png',
                       height: 80,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => const Text('MediExpress', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                      errorBuilder: (_, __, ___) => Text(l10n.appTitle, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                     ),
                     IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -209,9 +202,9 @@ class _PagoPantallaState extends State<PagoPantalla> {
               ),
 
               const SizedBox(height: 6),
-              const Text(
-                'Método de pago',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+              Text(
+                l10n.paymentMethodTitle,
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               const SizedBox(height: 12),
 
@@ -226,28 +219,28 @@ class _PagoPantallaState extends State<PagoPantalla> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 8),
-                    const Text('Selecciona un método de pago:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    Text(l10n.selectPaymentMethodPrompt, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 12),
 
                     _buildPaymentTile(
                       id: 'Efectivo',
-                      title: 'Efectivo',
+                      title: l10n.paymentCashTitle,
                       icon: Icons.attach_money,
-                      subtitle: 'Paga en efectivo al recibir',
+                      subtitle: l10n.paymentCashSubtitle,
                     ),
                     _buildPaymentTile(
                       id: 'Tarjeta Débito',
-                      title: 'Tarjeta Débito',
+                      title: l10n.paymentDebitTitle,
                       icon: Icons.payment,
                       assetImage: 'assets/imagenes/tarjetadebito.webp',
-                      subtitle: 'Pago con débito bancario',
+                      subtitle: l10n.paymentDebitSubtitle,
                     ),
                     _buildPaymentTile(
                       id: 'Tarjeta Crédito',
-                      title: 'Tarjeta Crédito',
+                      title: l10n.paymentCreditTitle,
                       icon: Icons.credit_card,
                       assetImage: 'assets/imagenes/tarjetacredito.jpg',
-                      subtitle: 'Paga con Visa, MasterCard, Amex',
+                      subtitle: l10n.paymentCreditSubtitle,
                     ),
 
                     const SizedBox(height: 16),
@@ -255,7 +248,7 @@ class _PagoPantallaState extends State<PagoPantalla> {
 
                     // Método de entrega
                     const SizedBox(height: 8),
-                    const Text('Método de entrega', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    Text(l10n.deliveryMethodTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
@@ -265,8 +258,8 @@ class _PagoPantallaState extends State<PagoPantalla> {
                             value: 'domicilio',
                             groupValue: _deliveryMethod,
                             onChanged: (v) => setState(() => _deliveryMethod = v ?? 'domicilio'),
-                            title: const Text('Domicilio'),
-                            subtitle: const Text('Cargo fijo de \$3.500 por pedido'),
+                            title: Text(l10n.deliveryHome),
+                            subtitle: Text(l10n.deliveryHomeSubtitle(_formatCurrency(context, 3500))),
                           ),
                           const Divider(height: 1),
                           RadioListTile<String>(
@@ -282,8 +275,8 @@ class _PagoPantallaState extends State<PagoPantalla> {
                                 }
                               });
                             },
-                            title: const Text('Reclamar presencialmente'),
-                            subtitle: const Text('Sin cargo adicional'),
+                            title: Text(l10n.pickupInStore),
+                            subtitle: Text(l10n.pickupNoCharge),
                           ),
                         ],
                       ),
@@ -292,18 +285,18 @@ class _PagoPantallaState extends State<PagoPantalla> {
                     // Panel de locales si se elige presencial
                     if (_deliveryMethod == 'presencial') ...[
                       const SizedBox(height: 8),
-                      const Text('Selecciona un local para retirar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      Text(l10n.selectPickupStore, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       ValueListenableBuilder<List<DistributionInfo>>(
                         valueListenable: DistributionService.instance.points,
                         builder: (context, points, _) {
                           if (points.isEmpty) {
-                            return const Text('No hay locales disponibles en este momento');
+                            return Text(l10n.noStoresAvailableNow);
                           }
                           // Filtrar por disponibles
                           final visibles = points.where((p) => p.available).toList();
                           if (visibles.isEmpty) {
-                            return const Text('No hay locales con disponibilidad actualmente');
+                            return Text(l10n.noStoresWithAvailability);
                           }
                           return Card(
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
@@ -326,8 +319,8 @@ class _PagoPantallaState extends State<PagoPantalla> {
                                       subtitle: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('Dirección: ${p.address}'),
-                                          Text('Horario: ${p.openingHours}'),
+                                          Text('${l10n.addressLabel}: ${p.address}'),
+                                          Text('${l10n.scheduleLabel}: ${p.openingHours}'),
                                         ],
                                       ),
                                     ),
@@ -345,39 +338,39 @@ class _PagoPantallaState extends State<PagoPantalla> {
                     const Divider(),
 
                     // Resumen de compra
-                    Text('Resumen (${_articulos.length} artículos)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    Text(l10n.summaryWithCount(_articulos.length), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     if (_articulos.isEmpty)
-                      const Center(child: Text('No hay artículos para pagar.'))
+                      Center(child: Text(l10n.noItemsToPay))
                     else ..._articulos.map((a) => ListTile(
                           leading: SizedBox(width: 56, child: a['image'] != null && a['image'].toString().isNotEmpty ? Image.network(a['image'], fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image)) : const Icon(Icons.medication)),
-                          title: Text(a['name'] ?? a['title'] ?? a['nombre'] ?? 'Sin nombre'),
+                          title: Text(a['name'] ?? a['title'] ?? a['nombre'] ?? l10n.cashUnnamedItem),
                           subtitle: Text(a['description'] ?? a['descripcion'] ?? ''),
-                          trailing: Text(_formatCop(_parsePrice(a['price'] ?? a['precio'] ?? a['valor'] ?? 0))),
+                          trailing: Text(_formatCurrency(context, _parsePrice(a['price'] ?? a['precio'] ?? a['valor'] ?? 0))),
                         )),
 
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Subtotal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                        Text(_formatCop(_total), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        Text(l10n.subtotal, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        Text(_formatCurrency(context, _total), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       ],
                     ),
                     const SizedBox(height: 6),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(_deliveryMethod == 'domicilio' ? 'Domicilio' : 'Retiro en local', style: const TextStyle(fontSize: 16)),
-                        Text(_deliveryMethod == 'domicilio' ? _formatCop(_deliveryFee) : 'Gratis'),
+                        Text(_deliveryMethod == 'domicilio' ? l10n.deliveryHome : l10n.pickupInStore, style: const TextStyle(fontSize: 16)),
+                        Text(_deliveryMethod == 'domicilio' ? _formatCurrency(context, _deliveryFee) : l10n.free),
                       ],
                     ),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Total', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        Text(_formatCop(_grandTotal), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF002B68))),
+                        Text(l10n.cartTotal, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(_formatCurrency(context, _grandTotal), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF002B68))),
                       ],
                     ),
 
@@ -433,7 +426,7 @@ class _PagoPantallaState extends State<PagoPantalla> {
                                   );
                                 }
                               },
-                        child: const Text('Continuar', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        child: Text(l10n.continueLabel, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                     ),
                     const SizedBox(height: 12),

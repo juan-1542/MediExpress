@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
 import '../Servicios/cart_service.dart';
 import 'Estado_Pedido.dart';
 
@@ -51,23 +53,15 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
     return int.tryParse(digits) ?? 0;
   }
 
-  String _formatCop(int value) {
-    final s = value.toString();
-    final buffer = StringBuffer();
-    int count = 0;
-    for (int i = s.length - 1; i >= 0; i--) {
-      buffer.write(s[i]);
-      count++;
-      if (count == 3 && i != 0) {
-        buffer.write('.');
-        count = 0;
-      }
-    }
-    return '\$${buffer.toString().split('').reversed.join('')}';
+  String _formatCurrency(BuildContext context, int value) {
+    final l10n = AppLocalizations.of(context)!;
+    final formatter = NumberFormat.currency(locale: l10n.localeName, symbol: '\$', decimalDigits: 0);
+    return formatter.format(value);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: azulFondo,
       body: SafeArea(
@@ -85,7 +79,7 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
                 ),
               ),
               const SizedBox(height: 6),
-              const Text('Pago en efectivo', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+              Text(l10n.cashTitle, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
               const SizedBox(height: 18),
 
               Container(
@@ -96,26 +90,26 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Total a pagar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    Text(l10n.cashTotalToPay, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
-                    Text(_formatCop(_monto), style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: azulFondo)),
+                    Text(_formatCurrency(context, _monto), style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: azulFondo)),
                     const SizedBox(height: 16),
                     Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Text('Cantidad recibida', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                          Text(l10n.cashAmountReceived, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 6),
                           TextFormField(
                             controller: _amountController,
                             keyboardType: TextInputType.number,
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(9)],
-                            decoration: const InputDecoration(hintText: 'Ingresa la cantidad en pesos', border: UnderlineInputBorder()),
+                            decoration: InputDecoration(hintText: l10n.cashEnterAmountHint, border: const UnderlineInputBorder()),
                             validator: (value) {
                               final entered = _parseInput(value ?? '');
-                              if (entered <= 0) return 'Ingresa una cantidad válida';
-                              if (entered < _monto) return 'La cantidad es menor al total a pagar';
+                              if (entered <= 0) return l10n.cashEnterValidAmount;
+                              if (entered < _monto) return l10n.cashAmountLessThanTotal;
                               return null;
                             },
                             onChanged: (_) => setState(() {}),
@@ -132,19 +126,19 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 if (needChangeVisible) ...[
-                                  Text('Necesitarás cambio: ${_formatCop(changeAmount)}', style: TextStyle(fontWeight: FontWeight.w600)),
+                                  Text(l10n.cashNeedChange(_formatCurrency(context, changeAmount)), style: const TextStyle(fontWeight: FontWeight.w600)),
                                   const SizedBox(height: 8),
                                   ElevatedButton(
                                     onPressed: () async {
                                       // validar y procesar como pago aprobado
                                       if (!(_formKey.currentState?.validate() ?? false)) {
-                                        ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Corrige la cantidad ingresada')));
+                                        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(l10n.cashFixEnteredAmount)));
                                         return;
                                       }
                                       await _procesarPago(entered);
                                     },
                                     style: ElevatedButton.styleFrom(backgroundColor: azulFondo),
-                                    child: const Text('Necesitaré cambio'),
+                                    child: Text(l10n.cashNeedChangeButton),
                                   ),
                                   const SizedBox(height: 10),
                                 ],
@@ -153,14 +147,14 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
                                 ElevatedButton(
                                   onPressed: () async {
                                     if (!(_formKey.currentState?.validate() ?? false)) {
-                                      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Corrige la cantidad ingresada')));
+                                      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(l10n.cashFixEnteredAmount)));
                                       return;
                                     }
                                     final entered2 = _parseInput(_amountController.text);
                                     await _procesarPago(entered2);
                                   },
                                   style: ElevatedButton.styleFrom(backgroundColor: azulFondo),
-                                  child: const Text('Aceptar pago'),
+                                  child: Text(l10n.cashAcceptPayment),
                                 ),
                               ],
                             );
@@ -168,18 +162,19 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
 
                           const SizedBox(height: 12),
                           // Opcional: mostrar resumen de artículos
-                          Text('Resumen (${_articulos.length} artículos)', style: TextStyle(fontWeight: FontWeight.w600)),
+                          Text(l10n.cashSummaryWithCount(_articulos.length), style: const TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 8),
                           if (_articulos.isEmpty)
-                            const Text('No hay artículos')
+                            Text(l10n.cashNoItems)
                           else
                             ..._articulos.map((a) {
-                              final name = a['name'] ?? a['title'] ?? a['nombre'] ?? 'Sin nombre';
+                              final name = a['name'] ?? a['title'] ?? a['nombre'] ?? l10n.cashUnnamedItem;
                               final price = a['price'] ?? a['precio'] ?? a['valor'] ?? 0;
+                              final parsedPrice = (price is int) ? price : int.tryParse(price.toString().replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
                               return ListTile(
                                 leading: const Icon(Icons.medication),
                                 title: Text(name),
-                                trailing: Text(_formatCop((price is int) ? price : int.tryParse(price.toString().replaceAll(RegExp(r'[^0-9]'), '')) ?? 0)),
+                                trailing: Text(_formatCurrency(context, parsedPrice)),
                               );
                             }),
                         ],
@@ -198,6 +193,7 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
   }
 
   Future<void> _procesarPago(int recibido) async {
+    final l10n = AppLocalizations.of(context)!;
     // Mostrar loader
     if (context.mounted) {
       showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
@@ -218,15 +214,15 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
       if (context.mounted) Navigator.of(context).pop();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Pago aprobado. Cambio: ${_formatCop(recibido - _monto)}')));
+        final changeText = _formatCurrency(context, (recibido - _monto));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.cashPaymentApproved(changeText))));
 
         // Navegar a estado
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => EstadoPedidoScreen(orderId: orderId, status: 'Pago aprobado')));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => EstadoPedidoScreen(orderId: orderId, status: l10n.cashPaymentApprovedStatus)));
       }
     } catch (e) {
       if (context.mounted) Navigator.of(context).pop();
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error procesando pago: ${e.toString()}')));
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.cashErrorProcessing(e.toString()))));
     }
   }
 }
-

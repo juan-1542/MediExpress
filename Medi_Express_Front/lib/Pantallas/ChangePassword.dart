@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -16,29 +17,30 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool _loading = false;
 
   void _submit() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     final current = _currentController.text;
     final nw = _newController.text;
 
     final user = AuthService.instance.currentUser.value;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No hay usuario autenticado')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.noAuthenticatedUser)));
       return;
     }
 
     setState(() => _loading = true);
     // Simulación de petición
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 500));
 
     final ok = AuthService.instance.changePassword(user.email, current, nw);
     setState(() => _loading = false);
 
     if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Contraseña actual incorrecta')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.currentPasswordIncorrect)));
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Contraseña actualizada')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.passwordUpdated)));
     Navigator.pop(context, true);
   }
 
@@ -52,9 +54,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cambiar contraseña'),
+        title: Text(l10n.changePasswordTitle),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
@@ -69,45 +72,47 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 TextFormField(
                   controller: _currentController,
                   obscureText: true,
-                  decoration: InputDecoration(labelText: 'Contraseña actual', prefixIcon: Icon(Icons.lock_outline)),
-                  validator: (v) => (v == null || v.isEmpty) ? 'Ingresa la contraseña actual' : null,
+                  decoration: InputDecoration(labelText: l10n.currentPasswordLabel, prefixIcon: const Icon(Icons.lock_outline)),
+                  validator: (v) => (v == null || v.isEmpty) ? l10n.enterCurrentPassword : null,
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 TextFormField(
                   controller: _newController,
                   obscureText: true,
-                  decoration: InputDecoration(labelText: 'Nueva contraseña', prefixIcon: Icon(Icons.lock)),
+                  decoration: InputDecoration(labelText: l10n.newPasswordLabel, prefixIcon: const Icon(Icons.lock)),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Ingresa la nueva contraseña';
-                    if (v.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
+                    if (v == null || v.isEmpty) return l10n.enterNewPassword;
+                    if (v.length < 6) return l10n.passwordMinLength;
                     return null;
                   },
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 TextFormField(
                   controller: _confirmController,
                   obscureText: true,
-                  decoration: InputDecoration(labelText: 'Confirmar nueva contraseña', prefixIcon: Icon(Icons.lock_clock)),
+                  decoration: InputDecoration(labelText: l10n.confirmNewPasswordLabel, prefixIcon: const Icon(Icons.lock_clock)),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Confirma la nueva contraseña';
-                    if (v != _newController.text) return 'Las contraseñas no coinciden';
+                    if (v == null || v.isEmpty) return l10n.confirmNewPasswordPrompt;
+                    if (v != _newController.text) return l10n.passwordsDoNotMatch;
                     return null;
                   },
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _loading ? null : () => Navigator.pop(context, false),
-                        child: Text('Cancelar'),
+                        child: Text(l10n.cancel),
                       ),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: _loading ? null : _submit,
-                        child: _loading ? SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Guardar'),
+                        child: _loading
+                            ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : Text(l10n.save),
                       ),
                     ),
                   ],
@@ -120,4 +125,3 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
   }
 }
-

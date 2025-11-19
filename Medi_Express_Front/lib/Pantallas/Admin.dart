@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
 import 'package:medi_express_front/Servicios/product_service.dart';
 import 'package:medi_express_front/Servicios/distribution_service.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -75,7 +76,8 @@ class _AdminScreenState extends State<AdminScreen> {
     _productPriceCtrl.clear();
     _productDescCtrl.clear();
     _productQtyCtrl.clear();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Producto añadido')));
+    final t = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.adminProductAdded ?? 'Producto añadido')));
   }
 
   void _addLocal() {
@@ -92,15 +94,17 @@ class _AdminScreenState extends State<AdminScreen> {
     _locHoursCtrl.clear();
     _locAvailable = true;
     setState(() {});
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Local añadido')));
+    final t = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.adminStoreAdded ?? 'Local añadido')));
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final isAdmin = AuthService.instance.currentUser.value?.isAdmin ?? false;
     if (!isAdmin) {
       return Scaffold(
-        appBar: AppBar(title: Text('Admin')),
+        appBar: AppBar(title: Text(t?.adminPanelTitle ?? 'Admin')),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -109,13 +113,13 @@ class _AdminScreenState extends State<AdminScreen> {
               children: [
                 Icon(Icons.lock_outline, size: 56, color: Colors.grey),
                 SizedBox(height: 12),
-                Text('Acceso denegado', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(t?.adminAccessDeniedTitle ?? 'Acceso denegado', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),
-                Text('Solo los usuarios con rol de administrador pueden acceder a esta pantalla.'),
+                Text(t?.adminAccessDeniedMessage ?? 'Solo los usuarios con rol de administrador pueden acceder a esta pantalla.'),
                 SizedBox(height: 18),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('Volver'),
+                  child: Text(t?.back ?? 'Volver'),
                 )
               ],
             ),
@@ -145,7 +149,7 @@ class _AdminScreenState extends State<AdminScreen> {
           child: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            title: Text('Panel de administración', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+            title: Text(t?.adminPanelTitle ?? 'Panel de administración', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
             iconTheme: IconThemeData(color: Colors.white),
           ),
         ),
@@ -169,7 +173,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Añadir producto', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+                      Text(t?.adminAddProduct ?? 'Añadir producto', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
                       SizedBox(height: 8),
                       Form(
                         key: _formKey,
@@ -177,29 +181,29 @@ class _AdminScreenState extends State<AdminScreen> {
                           children: [
                             TextFormField(
                               controller: _productNameCtrl,
-                              decoration: InputDecoration(labelText: 'Nombre del producto'),
-                              validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa el nombre' : null,
+                              decoration: InputDecoration(labelText: t?.adminProductName ?? 'Nombre del producto'),
+                              validator: (v) => (v == null || v.trim().isEmpty) ? (t?.adminEnterProductName ?? 'Ingresa el nombre') : null,
                             ),
                             SizedBox(height: 8),
                             TextFormField(
                               controller: _productDosageCtrl,
-                              decoration: InputDecoration(labelText: 'Dosis'),
+                              decoration: InputDecoration(labelText: t?.adminProductDosage ?? 'Dosis'),
                             ),
                             SizedBox(height: 8),
                             TextFormField(
                               controller: _productPriceCtrl,
-                              decoration: InputDecoration(labelText: 'Precio (ej. 15000)'),
+                              decoration: InputDecoration(labelText: t?.adminProductPriceHint ?? 'Precio (ej. 15000)'),
                               keyboardType: TextInputType.number,
                             ),
                             SizedBox(height: 8),
                             TextFormField(
                               controller: _productQtyCtrl,
-                              decoration: InputDecoration(labelText: 'Cantidad (ej. 10)'),
+                              decoration: InputDecoration(labelText: t?.adminProductQuantityHint ?? 'Cantidad (ej. 10)'),
                               keyboardType: TextInputType.number,
                               validator: (v) {
-                                if (v == null || v.trim().isEmpty) return 'Ingresa la cantidad';
+                                if (v == null || v.trim().isEmpty) return t?.adminEnterQuantity ?? 'Ingresa la cantidad';
                                 final n = int.tryParse(v.trim());
-                                if (n == null || n < 0) return 'Cantidad inválida';
+                                if (n == null || n < 0) return t?.adminInvalidQuantity ?? 'Cantidad inválida';
                                 return null;
                               },
                             ),
@@ -207,7 +211,7 @@ class _AdminScreenState extends State<AdminScreen> {
                             TextFormField(
                               controller: _productDescCtrl,
                               maxLines: 3,
-                              decoration: InputDecoration(labelText: 'Descripción'),
+                              decoration: InputDecoration(labelText: t?.adminDescription ?? 'Descripción'),
                             ),
                             SizedBox(height: 12),
                             Row(
@@ -222,7 +226,7 @@ class _AdminScreenState extends State<AdminScreen> {
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                       elevation: 4,
                                     ),
-                                    child: Text('Añadir producto', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    child: Text(t?.adminAddProduct ?? 'Añadir producto', style: TextStyle(fontWeight: FontWeight.bold)),
                                   ),
                                 ),
                                 SizedBox(width: 12),
@@ -237,7 +241,7 @@ class _AdminScreenState extends State<AdminScreen> {
                                     side: BorderSide(color: Color(0xFF4A90E2)),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   ),
-                                  child: Text('Limpiar productos', style: TextStyle(color: Color(0xFF4A90E2))),
+                                  child: Text(t?.adminClearProducts ?? 'Limpiar productos', style: TextStyle(color: Color(0xFF4A90E2))),
                                 ),
                               ],
                             ),
@@ -262,28 +266,28 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Gestión del punto de distribución', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+                      Text(t?.adminDistributionSection ?? 'Gestión del punto de distribución', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
                       SizedBox(height: 8),
                       TextFormField(
                         initialValue: _pointName,
-                        decoration: InputDecoration(labelText: 'Nombre del punto de distribución'),
+                        decoration: InputDecoration(labelText: t?.adminDistributionPointName ?? 'Nombre del punto de distribución'),
                         onChanged: (v) => setState(() => _pointName = v),
                       ),
                       SizedBox(height: 8),
                       TextFormField(
                         initialValue: _address,
-                        decoration: InputDecoration(labelText: 'Dirección'),
+                        decoration: InputDecoration(labelText: t?.addressLabel ?? 'Dirección'),
                         onChanged: (v) => setState(() => _address = v),
                       ),
                       SizedBox(height: 8),
                       TextFormField(
                         initialValue: _openingHours,
-                        decoration: InputDecoration(labelText: 'Horario de atención'),
+                        decoration: InputDecoration(labelText: t?.scheduleLabel ?? 'Horario'),
                         onChanged: (v) => setState(() => _openingHours = v),
                       ),
                       SizedBox(height: 8),
                       SwitchListTile(
-                        title: Text('Disponibilidad de medicamentos'),
+                        title: Text(t?.adminMedicinesAvailability ?? 'Disponibilidad de medicamentos'),
                         value: _available,
                         onChanged: (v) => setState(() => _available = v),
                       ),
@@ -291,7 +295,7 @@ class _AdminScreenState extends State<AdminScreen> {
                       ElevatedButton(
                         onPressed: () {
                           DistributionService.instance.update(name: _pointName, address: _address, openingHours: _openingHours, available: _available);
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Datos de punto de distribución guardados')));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.adminDistributionSaved ?? 'Datos de punto de distribución guardados')));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF4A90E2),
@@ -300,7 +304,7 @@ class _AdminScreenState extends State<AdminScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           elevation: 4,
                         ),
-                        child: Text('Guardar punto de distribución', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text(t?.adminSaveDistributionPoint ?? 'Guardar punto de distribución', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -320,7 +324,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Añadir local', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+                      Text(t?.adminAddStore ?? 'Añadir local', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
                       SizedBox(height: 8),
                       Form(
                         key: _localFormKey,
@@ -328,24 +332,24 @@ class _AdminScreenState extends State<AdminScreen> {
                           children: [
                             TextFormField(
                               controller: _locNameCtrl,
-                              decoration: InputDecoration(labelText: 'Nombre del local'),
-                              validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa el nombre del local' : null,
+                              decoration: InputDecoration(labelText: t?.adminStoreName ?? 'Nombre del local'),
+                              validator: (v) => (v == null || v.trim().isEmpty) ? (t?.adminEnterStoreName ?? 'Ingresa el nombre del local') : null,
                             ),
                             SizedBox(height: 8),
                             TextFormField(
                               controller: _locAddressCtrl,
-                              decoration: InputDecoration(labelText: 'Dirección'),
-                              validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa una dirección' : null,
+                              decoration: InputDecoration(labelText: t?.addressLabel ?? 'Dirección'),
+                              validator: (v) => (v == null || v.trim().isEmpty) ? (t?.adminEnterAddress ?? 'Ingresa una dirección') : null,
                             ),
                             SizedBox(height: 8),
                             TextFormField(
                               controller: _locHoursCtrl,
-                              decoration: InputDecoration(labelText: 'Horario de atención'),
+                              decoration: InputDecoration(labelText: t?.scheduleLabel ?? 'Horario'),
                             ),
                             SizedBox(height: 8),
                             SwitchListTile(
                               contentPadding: EdgeInsets.zero,
-                              title: Text('Disponible'),
+                              title: Text(t?.available ?? 'Disponible'),
                               value: _locAvailable,
                               onChanged: (v) => setState(() => _locAvailable = v),
                             ),
@@ -361,7 +365,7 @@ class _AdminScreenState extends State<AdminScreen> {
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   elevation: 4,
                                 ),
-                                child: Text('Añadir local', style: TextStyle(fontWeight: FontWeight.bold)),
+                                child: Text(t?.adminAddStore ?? 'Añadir local', style: TextStyle(fontWeight: FontWeight.bold)),
                               ),
                             ),
                           ],
@@ -385,12 +389,12 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Productos añadidos', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+                      Text(t?.adminAddedProducts ?? 'Productos añadidos', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
                       SizedBox(height: 8),
                       ValueListenableBuilder<List<Map<String, String>>>(
                         valueListenable: ProductService.instance.products,
                         builder: (context, list, _) {
-                          if (list.isEmpty) return Center(child: Text('No hay productos añadidos'));
+                          if (list.isEmpty) return Center(child: Text(t?.adminNoProducts ?? 'No hay productos añadidos'));
                           return Column(
                             children: List.generate(list.length, (idx) {
                               final p = list[idx];
@@ -399,7 +403,7 @@ class _AdminScreenState extends State<AdminScreen> {
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 child: ListTile(
                                   title: Text(p['name'] ?? '', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  subtitle: Text('${p['dosage'] ?? ''} • ${p['price'] ?? ''} • Cantidad: ${p['quantity'] ?? '0'}'),
+                                  subtitle: Text('${p['dosage'] ?? ''} • ${p['price'] ?? ''} • ${(t != null) ? t.quantityTag(p['quantity'] ?? '0') : 'Cantidad: ${p['quantity'] ?? '0'}'}'),
                                   trailing: IconButton(
                                     icon: Icon(Icons.delete, color: Colors.redAccent),
                                     onPressed: () {
@@ -430,12 +434,12 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Locales añadidos', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+                      Text(t?.adminAddedStores ?? 'Locales añadidos', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
                       SizedBox(height: 8),
                       ValueListenableBuilder<List<DistributionInfo>>(
                         valueListenable: DistributionService.instance.points,
                         builder: (context, points, _) {
-                          if (points.isEmpty) return Center(child: Text('No hay locales añadidos'));
+                          if (points.isEmpty) return Center(child: Text(t?.adminNoStores ?? 'No hay locales añadidos'));
                           final selected = DistributionService.instance.info.value?.name;
                           return Column(
                             children: List.generate(points.length, (idx) {
@@ -451,28 +455,28 @@ class _AdminScreenState extends State<AdminScreen> {
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
-                                          child: const Text('Disponible', style: TextStyle(color: Colors.green, fontSize: 12)),
+                                          child: Text(t?.available ?? 'Disponible', style: TextStyle(color: Colors.green, fontSize: 12)),
                                         )
                                       else
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(12)),
-                                          child: const Text('No disponible', style: TextStyle(color: Colors.red, fontSize: 12)),
+                                          child: Text(t?.notAvailable ?? 'No disponible', style: TextStyle(color: Colors.red, fontSize: 12)),
                                         ),
                                     ],
                                   ),
                                   subtitle: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('Dirección: ${p.address}'),
-                                      Text('Horario: ${p.openingHours}'),
+                                      Text('${t?.addressLabel ?? 'Dirección'}: ${p.address}'),
+                                      Text('${t?.scheduleLabel ?? 'Horario'}: ${p.openingHours}'),
                                     ],
                                   ),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       IconButton(
-                                        tooltip: 'Seleccionar como activo',
+                                        tooltip: t?.adminSelectAsActive ?? 'Seleccionar como activo',
                                         icon: Icon(Icons.check_circle, color: p.name == selected ? Colors.blue : Colors.grey),
                                         onPressed: () {
                                           DistributionService.instance.setInfo(p);

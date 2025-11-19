@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final AppUser? initialUser;
@@ -60,12 +61,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     AuthService.instance.login(updated);
 
     setState(() => _loading = false);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Perfil actualizado')));
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.profileUpdated)));
     Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(80.0),
@@ -78,7 +81,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: Offset(0, 4),
               ),
@@ -87,7 +90,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            title: Text('Editar perfil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+            title: Text(l10n.editProfileTitle, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
             iconTheme: IconThemeData(color: Colors.white),
           ),
         ),
@@ -99,7 +102,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
               borderRadius: BorderRadius.circular(18),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: Offset(0, 8))],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: Offset(0, 8))],
             ),
             padding: EdgeInsets.all(18),
             child: Form(
@@ -109,28 +112,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
-                      labelText: 'Nombre completo',
+                      labelText: l10n.fullNameLabel,
                       prefixIcon: Icon(Icons.person, color: Color(0xFF4A90E2)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2).withValues(alpha: 0.3)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Color(0xFF4A90E2)),
                       ),
                     ),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa el nombre' : null,
+                    validator: (v) => (v == null || v.trim().isEmpty) ? l10n.enterNamePrompt : null,
                   ),
                   SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: 'Correo',
+                      labelText: l10n.emailLabel,
                       prefixIcon: Icon(Icons.email, color: Color(0xFF4A90E2)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2).withValues(alpha: 0.3)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -139,8 +142,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Ingresa el correo';
-                      if (!RegExp(r"^[\w.-]+@([\w-]+\.)+[\w-]{2,4}").hasMatch(v)) return 'Ingresa un correo válido';
+                      if (v == null || v.trim().isEmpty) return l10n.enterEmailPrompt;
+                      if (!RegExp(r"^[\w.-]+@([\w-]+\.)+[\w-]{2,4}").hasMatch(v)) return l10n.invalidEmail;
                       return null;
                     },
                   ),
@@ -148,11 +151,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   TextFormField(
                     controller: _phoneController,
                     decoration: InputDecoration(
-                      labelText: 'Teléfono',
+                      labelText: l10n.phoneLabel,
                       prefixIcon: Icon(Icons.phone, color: Color(0xFF4A90E2)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2).withValues(alpha: 0.3)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -165,11 +168,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   TextFormField(
                     controller: _addressController,
                     decoration: InputDecoration(
-                      labelText: 'Dirección',
+                      labelText: l10n.addressLabel,
                       prefixIcon: Icon(Icons.location_on, color: Color(0xFF4A90E2)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2).withValues(alpha: 0.3)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -181,11 +184,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   TextFormField(
                     controller: _avatarController,
                     decoration: InputDecoration(
-                      labelText: 'URL avatar (opcional)',
+                      labelText: l10n.avatarUrlOptionalLabel,
                       prefixIcon: Icon(Icons.image, color: Color(0xFF4A90E2)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFF4A90E2).withOpacity(0.3)),
+                        borderSide: BorderSide(color: Color(0xFF4A90E2).withValues(alpha: 0.3)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -205,7 +208,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             side: BorderSide(color: Color(0xFF4A90E2)),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: Text('Cancelar', style: TextStyle(color: Color(0xFF4A90E2))),
+                          child: Text(l10n.cancel, style: TextStyle(color: Color(0xFF4A90E2))),
                         ),
                       ),
                       SizedBox(width: 16),
@@ -218,9 +221,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             elevation: 4,
-                            shadowColor: Color(0xFF4A90E2).withOpacity(0.3),
+                            shadowColor: Color(0xFF4A90E2).withValues(alpha: 0.3),
                           ),
-                          child: _loading ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Guardar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                          child: _loading ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text(l10n.save, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                         ),
                       ),
                     ],

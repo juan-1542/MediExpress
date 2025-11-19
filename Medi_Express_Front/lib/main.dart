@@ -7,6 +7,7 @@ import 'Pantallas/TarjetaDebitoPantalla.dart';
 import 'Pantallas/EfectivoPantalla.dart';
 import 'Pantallas/Estado_Pedido.dart';
 import 'Servicios/locale_service.dart';
+import 'l10n/app_localizations.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Locale?>(
+      // Escucha cambios del idioma
       valueListenable: LocaleService.instance.locale,
       builder: (context, locale, _) {
         return MaterialApp(
@@ -32,29 +34,19 @@ class MyApp extends StatelessWidget {
             ),
           ),
           locale: locale,
-          supportedLocales: const [
-            Locale('es'),
-            Locale('en'),
-            Locale('de'),
-            Locale('fr'),
-            Locale('pt'),
-          ],
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           builder: (context, child) {
-            // Overlay de selector de idioma siempre visible en la parte superior derecha
+            // Contenedor superior; se deja para futuras expansiones
             return Stack(
               children: [
                 if (child != null) child,
-                // Panel flotante superior derecha
                 SafeArea(
                   child: Align(
                     alignment: Alignment.topRight,
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 6.0, right: 6.0)
+                      padding: const EdgeInsets.only(top: 6.0, right: 6.0),
+                      child: SizedBox.shrink(),
                     ),
                   ),
                 ),

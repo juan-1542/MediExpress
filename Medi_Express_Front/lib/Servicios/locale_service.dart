@@ -7,13 +7,10 @@ class LocaleService {
   // null => usa el locale del sistema
   final ValueNotifier<Locale?> locale = ValueNotifier<Locale?>(null);
 
-  // Lista de idiomas soportados
+  // Lista de idiomas soportados (alineada con AppLocalizations)
   static const supported = <Locale>[
     Locale('es'),
     Locale('en'),
-    Locale('de'),
-    Locale('fr'),
-    Locale('pt'),
   ];
 
   void setLocale(Locale? l) {
@@ -26,4 +23,3 @@ class LocaleService {
     }
   }
 }
-

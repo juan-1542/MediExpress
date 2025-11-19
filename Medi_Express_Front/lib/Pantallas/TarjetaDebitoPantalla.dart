@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'Estado_Pedido.dart';
 import '../Servicios/cart_service.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
 
 // Formatter que inserta automáticamente '/' después de los dos primeros dígitos
 class ExpiryDateInputFormatter extends TextInputFormatter {
@@ -83,6 +84,7 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: azulFondo,
       body: SafeArea(
@@ -101,9 +103,9 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
               ),
 
               const SizedBox(height: 4),
-              const Text(
-                "Tarjeta de débito",
-                style: TextStyle(
+              Text(
+                l10n.paymentDebitTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -123,7 +125,7 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
                 child: Image.asset(
                   "assets/imagenes/tarjetadebito.webp",
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Center(child: Text('Tarjeta', style: TextStyle(color: Colors.black))),
+                  errorBuilder: (_, __, ___) => Center(child: Text(l10n.creditCardImageFallback, style: const TextStyle(color: Colors.black))),
                 ),
               ),
 
@@ -142,13 +144,13 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _inputCampoNumeroTarjeta(),
+                      _inputCampoNumeroTarjeta(l10n),
                       const SizedBox(height: 18),
-                      _inputCampoExpiry(),
+                      _inputCampoExpiry(l10n),
                       const SizedBox(height: 18),
-                      _inputCampoCVC(),
+                      _inputCampoCVC(l10n),
                       const SizedBox(height: 18),
-                      _inputCampoNombre(),
+                      _inputCampoNombre(l10n),
                     ],
                   ),
                 ),
@@ -194,8 +196,8 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
                           final orderId = DateTime.now().millisecondsSinceEpoch.toString();
                           final result = {
                             'orderId': orderId,
-                            'status': 'Pago aprobado',
-                            'mensaje': 'Pago simulado aprobado',
+                            'status': l10n.cashPaymentApprovedStatus,
+                            'mensaje': l10n.paymentSimulatedApproved,
                             'nombre': nombre,
                             'metodo': _metodoFromArgs,
                           };
@@ -220,16 +222,16 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => EstadoPedidoScreen(orderId: orderId, status: 'Pago aprobado'),
+                                builder: (_) => EstadoPedidoScreen(orderId: orderId, status: l10n.cashPaymentApprovedStatus),
                               ),
                             );
                           }
                         } catch (e) {
                           if (context.mounted) Navigator.of(context).pop();
-                          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al procesar el pago: ${e.toString()}')));
+                          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.cashErrorProcessing(e.toString()))));
                         }
                       } else {
-                        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Corrige los errores antes de continuar')));
+                        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.fixErrorsBeforeContinue)));
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -239,9 +241,9 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
                       ),
                       elevation: 6,
                     ),
-                    child: const Text(
-                      "Pagar",
-                      style: TextStyle(
+                    child: Text(
+                      l10n.payButton,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -259,13 +261,13 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
     );
   }
 
-  Widget _inputCampoNumeroTarjeta() {
+  Widget _inputCampoNumeroTarjeta(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Número de tarjeta',
-          style: TextStyle(
+        Text(
+          l10n.cardNumberLabel,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -281,21 +283,21 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
           ],
           style: const TextStyle(color: Colors.white),
           cursorColor: Colors.white,
-          decoration: const InputDecoration(
-            hintText: '1234123412341234',
-            hintStyle: TextStyle(color: Colors.white54),
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(
+          decoration: InputDecoration(
+            hintText: l10n.cardNumberHint,
+            hintStyle: const TextStyle(color: Colors.white54),
+            border: const UnderlineInputBorder(),
+            enabledBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.white70),
             ),
-            focusedBorder: UnderlineInputBorder(
+            focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.white),
             ),
           ),
           validator: (value) {
-            if (value == null) return 'Número inválido';
-            final digitsOnly = value.replaceAll(RegExp(r"\D"), '');
-            if (digitsOnly.length != 16) return 'El número debe tener exactamente 16 dígitos';
+            if (value == null) return l10n.cardNumberInvalid;
+            final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
+            if (digitsOnly.length != 16) return l10n.cardNumberExact16;
             return null;
           },
         ),
@@ -303,13 +305,13 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
     );
   }
 
-  Widget _inputCampoExpiry() {
+  Widget _inputCampoExpiry(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Fecha de expiración (MM/AA)',
-          style: TextStyle(
+        Text(
+          l10n.expiryLabel,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -326,29 +328,29 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
           ],
           style: const TextStyle(color: Colors.white),
           cursorColor: Colors.white,
-          decoration: const InputDecoration(
-            hintText: 'MM/AA',
-            hintStyle: TextStyle(color: Colors.white54),
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(
+          decoration: InputDecoration(
+            hintText: l10n.expiryHint,
+            hintStyle: const TextStyle(color: Colors.white54),
+            border: const UnderlineInputBorder(),
+            enabledBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.white70),
             ),
-            focusedBorder: UnderlineInputBorder(
+            focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.white),
             ),
           ),
           validator: (value) {
-            if (value == null || value.isEmpty) return 'Fecha requerida';
-            final regex = RegExp(r'^(0[1-9]|1[0-2])/(\d{2})$');
+            if (value == null || value.isEmpty) return l10n.expiryRequired;
+            final regex = RegExp(r'^(0[1-9]|1[0-2])\/(\d{2})$');
             final match = regex.firstMatch(value);
-            if (match == null) return 'Formato inválido (MM/AA)';
+            if (match == null) return l10n.expiryInvalidFormat;
             final mm = int.parse(match.group(1)!);
             final yy = int.parse(match.group(2)!);
             final now = DateTime.now();
             final currentMM = now.month;
             final currentYY = now.year % 100;
             if (mm == currentMM && yy == currentYY) {
-              return 'La fecha no puede ser igual al mes/año actual';
+              return l10n.expirySameAsCurrent;
             }
             return null;
           },
@@ -357,13 +359,13 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
     );
   }
 
-  Widget _inputCampoCVC() {
+  Widget _inputCampoCVC(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Código CVC',
-          style: TextStyle(
+        Text(
+          l10n.cvcLabel,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -379,21 +381,21 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
           ],
           style: const TextStyle(color: Colors.white),
           cursorColor: Colors.white,
-          decoration: const InputDecoration(
-            hintText: '123',
-            hintStyle: TextStyle(color: Colors.white54),
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(
+          decoration: InputDecoration(
+            hintText: l10n.cvcHint,
+            hintStyle: const TextStyle(color: Colors.white54),
+            border: const UnderlineInputBorder(),
+            enabledBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.white70),
             ),
-            focusedBorder: UnderlineInputBorder(
+            focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.white),
             ),
           ),
           validator: (value) {
-            if (value == null) return 'Código inválido';
-            final digitsOnly = value.replaceAll(RegExp(r"\D"), '');
-            if (digitsOnly.length != 3) return 'El CVC debe tener exactamente 3 dígitos';
+            if (value == null) return l10n.cvcInvalid;
+            final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
+            if (digitsOnly.length != 3) return l10n.cvcExact3;
             return null;
           },
         ),
@@ -401,13 +403,13 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
     );
   }
 
-  Widget _inputCampoNombre() {
+  Widget _inputCampoNombre(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Nombre en la tarjeta',
-          style: TextStyle(
+        Text(
+          l10n.nameOnCardLabel,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -418,19 +420,19 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
           controller: _nameController,
           style: const TextStyle(color: Colors.white),
           cursorColor: Colors.white,
-          decoration: const InputDecoration(
-            hintText: 'Como aparece en la tarjeta',
-            hintStyle: TextStyle(color: Colors.white54),
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(
+          decoration: InputDecoration(
+            hintText: l10n.nameOnCardHint,
+            hintStyle: const TextStyle(color: Colors.white54),
+            border: const UnderlineInputBorder(),
+            enabledBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.white70),
             ),
-            focusedBorder: UnderlineInputBorder(
+            focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.white),
             ),
           ),
           validator: (value) {
-            if (value == null || value.trim().isEmpty) return 'Nombre requerido';
+            if (value == null || value.trim().isEmpty) return l10n.nameOnCardRequired;
             return null;
           },
         ),
@@ -438,4 +440,3 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
     );
   }
 }
-

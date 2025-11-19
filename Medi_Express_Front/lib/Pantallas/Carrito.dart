@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/cart_service.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 class CarritoScreen extends StatefulWidget {
   const CarritoScreen({super.key});
@@ -14,36 +16,27 @@ class _CarritoScreenState extends State<CarritoScreen> {
     return int.tryParse(digits) ?? 0;
   }
 
-  String _formatPrice(int value) {
-    // formato simple con separador de miles usando puntos
-    final s = value.toString();
-    final buffer = StringBuffer();
-    int count = 0;
-    for (int i = s.length - 1; i >= 0; i--) {
-      buffer.write(s[i]);
-      count++;
-      if (count == 3 && i != 0) {
-        buffer.write('.');
-        count = 0;
-      }
-    }
-    return '\$${buffer.toString().split('').reversed.join('')}';
+  String _formatPrice(BuildContext context, int value) {
+    final l10n = AppLocalizations.of(context)!;
+    final formatter = NumberFormat.currency(locale: l10n.localeName, symbol: '\$', decimalDigits: 0);
+    return formatter.format(value);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFE8F9FF),
         elevation: 0,
-        title: Text('Carrito', style: TextStyle(color: Color(0xFF0A365A), fontWeight: FontWeight.bold)),
+        title: Text(l10n.cartTitle, style: TextStyle(color: Color(0xFF0A365A), fontWeight: FontWeight.bold)),
         iconTheme: IconThemeData(color: Color(0xFF4A90E2)),
       ),
       body: ValueListenableBuilder<List<CartItem>>(
         valueListenable: CartService.instance.items,
         builder: (context, items, _) {
           if (items.isEmpty) {
-            return Center(child: Text('El carrito está vacío'));
+            return Center(child: Text(l10n.cartEmpty));
           }
 
           final total = items.fold<int>(0, (sum, it) => sum + (_parsePrice(it.price) * it.quantity));
@@ -64,7 +57,7 @@ class _CarritoScreenState extends State<CarritoScreen> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
                           borderRadius: BorderRadius.circular(14),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: Offset(0, 6))],
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: Offset(0, 6))],
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
@@ -91,7 +84,7 @@ class _CarritoScreenState extends State<CarritoScreen> {
                                   children: [
                                     Text(it.name, style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF123A5A))),
                                     SizedBox(height: 6),
-                                    Text(it.price, style: TextStyle(color: Color(0xFF0077B6), fontWeight: FontWeight.bold)),
+                                    Text(_formatPrice(context, unit), style: TextStyle(color: Color(0xFF0077B6), fontWeight: FontWeight.bold)),
                                   ],
                                 ),
                               ),
@@ -100,7 +93,7 @@ class _CarritoScreenState extends State<CarritoScreen> {
                                 children: [
                                   Text('x${it.quantity}', style: TextStyle(fontWeight: FontWeight.w600)),
                                   SizedBox(height: 6),
-                                  Text(_formatPrice(subtotal), style: TextStyle(fontWeight: FontWeight.bold)),
+                                  Text(_formatPrice(context, subtotal), style: TextStyle(fontWeight: FontWeight.bold)),
                                 ],
                               )
                             ],
@@ -121,8 +114,8 @@ class _CarritoScreenState extends State<CarritoScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
-                      Text(_formatPrice(total), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
+                      Text(l10n.cartTotal, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+                      Text(_formatPrice(context, total), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
                     ],
                   ),
                 ),
@@ -143,14 +136,14 @@ class _CarritoScreenState extends State<CarritoScreen> {
                           Navigator.pushNamed(context, '/pago', arguments: args);
                         },
                         style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14)),
-                        child: Text('Ir a pagar'),
+                        child: Text(l10n.cartCheckout),
                       ),
                     ),
                     SizedBox(width: 12),
                     OutlinedButton(
                       onPressed: () => CartService.instance.clear(),
                       style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14)),
-                      child: Text('Vaciar carrito', style: TextStyle(color: Color(0xFF4A90E2))),
+                      child: Text(l10n.cartClear, style: TextStyle(color: Color(0xFF4A90E2))),
                     ),
                   ],
                 )

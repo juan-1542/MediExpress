@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
-import 'package:medi_express_front/Servicios/auth_service.dart';
 import 'Login.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
 
 class PerfilUsuarioScreen extends StatefulWidget {
   final dynamic usuario;
@@ -12,9 +11,9 @@ class PerfilUsuarioScreen extends StatefulWidget {
 }
 
 class _PerfilUsuarioScreenState extends State<PerfilUsuarioScreen> {
-
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final background = Color(0xFFF4F7FB);
     return Scaffold(
       appBar: PreferredSize(
@@ -28,7 +27,7 @@ class _PerfilUsuarioScreenState extends State<PerfilUsuarioScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: Offset(0, 4),
               ),
@@ -37,7 +36,7 @@ class _PerfilUsuarioScreenState extends State<PerfilUsuarioScreen> {
           child: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            title: Text('Perfil del Usuario', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+            title: Text(t?.userProfileTitle ?? 'Perfil del Usuario', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
             iconTheme: IconThemeData(color: Colors.white),
           ),
         ),
@@ -71,18 +70,18 @@ class _PerfilUsuarioScreenState extends State<PerfilUsuarioScreen> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
                     borderRadius: BorderRadius.circular(18),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 14, offset: Offset(0, 8))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 14, offset: Offset(0, 8))],
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Cédula: ${widget.usuario.cedula}', style: TextStyle(fontSize: 16)),
+                        Text('${t?.nationalIdLabel ?? 'Cédula'}: ${widget.usuario.cedula}', style: TextStyle(fontSize: 16)),
                         SizedBox(height: 6),
-                        Text('Teléfono: ${widget.usuario.telefono}', style: TextStyle(fontSize: 16)),
+                        Text('${t?.phoneLabel ?? 'Teléfono'}: ${widget.usuario.telefono}', style: TextStyle(fontSize: 16)),
                         SizedBox(height: 6),
-                        Text('Dirección: ${widget.usuario.direccion}', style: TextStyle(fontSize: 16)),
+                        Text('${t?.addressLabel ?? 'Dirección'}: ${widget.usuario.direccion}', style: TextStyle(fontSize: 16)),
                         SizedBox(height: 18),
                         Row(
                           children: [
@@ -90,7 +89,7 @@ class _PerfilUsuarioScreenState extends State<PerfilUsuarioScreen> {
                               child: ElevatedButton.icon(
                                 onPressed: () {/* TODO: Implementar editar perfil */},
                                 icon: Icon(Icons.edit),
-                                label: Text('Editar'),
+                                label: Text(t?.edit ?? 'Editar'),
                                 style: ElevatedButton.styleFrom(
                                   padding: EdgeInsets.symmetric(vertical: 12),
                                   backgroundColor: Color(0xFF4A90E2),
@@ -105,7 +104,7 @@ class _PerfilUsuarioScreenState extends State<PerfilUsuarioScreen> {
                               child: ElevatedButton.icon(
                                 onPressed: () {/* TODO: Implementar cerrar sesión */},
                                 icon: Icon(Icons.logout),
-                                label: Text('Cerrar sesión'),
+                                label: Text(t?.logoutTitle ?? 'Cerrar sesión'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.redAccent,
                                   foregroundColor: Colors.white,
@@ -131,20 +130,19 @@ class _PerfilUsuarioScreenState extends State<PerfilUsuarioScreen> {
   }
 
   Widget _buildLoggedOutView(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Column(
       children: [
         SizedBox(height: 8),
-        Text('No has iniciado sesión', style: TextStyle(fontSize: 16, color: Colors.black54)),
+        Text(t?.notLoggedIn ?? 'No has iniciado sesión', style: TextStyle(fontSize: 16, color: Colors.black54)),
         SizedBox(height: 12),
         SizedBox(
           width: 200,
           child: ElevatedButton(
             onPressed: () async {
-              // Navegar al login
-              final res = await Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
-              // Si el login setea un usuario, el listener actualizará la UI
+              await Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
             },
-            child: Text('Iniciar sesión'),
+            child: Text(t?.loginTitle ?? 'Iniciar sesión'),
           ),
         ),
       ],

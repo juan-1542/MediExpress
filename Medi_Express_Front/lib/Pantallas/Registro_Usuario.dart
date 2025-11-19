@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
 import 'package:medi_express_front/Pantallas/Home.dart';
+import 'package:medi_express_front/l10n/app_localizations.dart';
 
 class RegistroUsuarioScreen extends StatefulWidget {
   const RegistroUsuarioScreen({super.key});
@@ -21,17 +22,18 @@ class _RegistroUsuarioScreenState extends State<RegistroUsuarioScreen> {
   bool _loading = false;
 
   void _submit() {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     // Simular petición de registro
-    Future.delayed(Duration(milliseconds: 700), () {
+    Future.delayed(const Duration(milliseconds: 700), () {
       setState(() => _loading = false);
       // Construir AppUser desde el formulario
       final user = AppUser(
         fullName: _nameController.text.trim(),
         email: _emailController.text.trim(),
         phone: _telefonoController.text.trim().isNotEmpty ? _telefonoController.text.trim() : '+57 300 000 0000',
-        address: _direccionController.text.trim().isNotEmpty ? _direccionController.text.trim() : 'Dirección registrada',
+        address: _direccionController.text.trim().isNotEmpty ? _direccionController.text.trim() : l10n.registeredAddressFallback,
         avatarUrl: null,
         role: _tipoUsuario,
       );
@@ -39,22 +41,23 @@ class _RegistroUsuarioScreenState extends State<RegistroUsuarioScreen> {
       final password = _passwordController.text;
       final registered = AuthService.instance.register(user, password);
       if (!registered) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ya existe un usuario con ese correo')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.userAlreadyExists)));
         return;
       }
 
       // Si se registró correctamente, hacemos login automático
       AuthService.instance.login(user);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Registro y login realizados con éxito')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.registrationAndLoginSuccess)));
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFE8F9FF),
+        backgroundColor: const Color(0xFFE8F9FF),
         elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,32 +67,32 @@ class _RegistroUsuarioScreenState extends State<RegistroUsuarioScreen> {
                 Container(
                   width: 36,
                   height: 18,
-                  decoration: BoxDecoration(color: Color(0xFF7EC8E3), borderRadius: BorderRadius.circular(9)),
+                  decoration: BoxDecoration(color: const Color(0xFF7EC8E3), borderRadius: BorderRadius.circular(9)),
                 ),
-                SizedBox(width: 8),
-                Text('MediExpress', style: TextStyle(color: Color(0xFF0A365A), fontWeight: FontWeight.bold)),
+                const SizedBox(width: 8),
+                Text(l10n.appTitle, style: const TextStyle(color: Color(0xFF0A365A), fontWeight: FontWeight.bold)),
               ],
             ),
-            Text('Tu farmacia en minutos', style: TextStyle(fontSize: 12, color: Color(0xFF6B7C87))),
+            Text(l10n.homeSubtitle, style: const TextStyle(fontSize: 12, color: Color(0xFF6B7C87))),
           ],
         ),
-        iconTheme: IconThemeData(color: Color(0xFF4A90E2)),
+        iconTheme: const IconThemeData(color: Color(0xFF4A90E2)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Crear cuenta', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
-            SizedBox(height: 12),
-            Text('Regístrate para comprar más rápido y guardar tus datos', style: TextStyle(color: Color(0xFF6B7C87))),
-            SizedBox(height: 18),
+            Text(l10n.registerTitle, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+            const SizedBox(height: 12),
+            Text(l10n.registerSubtitle, style: const TextStyle(color: Color(0xFF6B7C87))),
+            const SizedBox(height: 18),
 
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
+                gradient: const LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: Offset(0, 8))],
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 8))],
               ),
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
@@ -100,91 +103,93 @@ class _RegistroUsuarioScreenState extends State<RegistroUsuarioScreen> {
                       TextFormField(
                         controller: _nameController,
                         decoration: InputDecoration(
-                          labelText: 'Nombre completo',
-                          prefixIcon: Icon(Icons.person, color: Color(0xFF4A90E2)),
+                          labelText: l10n.fullNameLabel,
+                          prefixIcon: const Icon(Icons.person, color: Color(0xFF4A90E2)),
                         ),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa tu nombre' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.nameRequired : null,
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       TextFormField(
                         controller: _cedulaController,
                         decoration: InputDecoration(
-                          labelText: 'Cédula',
-                          prefixIcon: Icon(Icons.badge, color: Color(0xFF4A90E2)),
+                          labelText: l10n.nationalIdLabel,
+                          prefixIcon: const Icon(Icons.badge, color: Color(0xFF4A90E2)),
                         ),
                         keyboardType: TextInputType.number,
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa la cédula' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.idRequired : null,
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       TextFormField(
                         controller: _telefonoController,
                         decoration: InputDecoration(
-                          labelText: 'Teléfono',
-                          prefixIcon: Icon(Icons.phone, color: Color(0xFF4A90E2)),
+                          labelText: l10n.phoneLabel,
+                          prefixIcon: const Icon(Icons.phone, color: Color(0xFF4A90E2)),
                         ),
                         keyboardType: TextInputType.phone,
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa el teléfono' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.phoneRequired : null,
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       TextFormField(
                         controller: _emailController,
                         decoration: InputDecoration(
-                          labelText: 'Correo',
-                          prefixIcon: Icon(Icons.email, color: Color(0xFF4A90E2)),
+                          labelText: l10n.emailLabel,
+                          prefixIcon: const Icon(Icons.email, color: Color(0xFF4A90E2)),
                         ),
                         keyboardType: TextInputType.emailAddress,
                         validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Ingresa el correo';
-                          if (!RegExp(r"^[\w.-]+@([\w-]+\.)+[\w-]{2,4}").hasMatch(v)) return 'Ingresa un correo válido';
+                          if (v == null || v.trim().isEmpty) return l10n.emailRequired;
+                          if (!RegExp(r"^[\w.-]+@([\w-]+\.)+[\w-]{2,4}").hasMatch(v)) return l10n.invalidEmail;
                           return null;
                         },
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       TextFormField(
                         controller: _direccionController,
                         decoration: InputDecoration(
-                          labelText: 'Dirección',
-                          prefixIcon: Icon(Icons.location_on, color: Color(0xFF4A90E2)),
+                          labelText: l10n.addressLabel,
+                          prefixIcon: const Icon(Icons.location_on, color: Color(0xFF4A90E2)),
                         ),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingresa la dirección' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.addressRequired : null,
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         initialValue: _tipoUsuario,
                         decoration: InputDecoration(
-                          labelText: 'Tipo de usuario',
-                          prefixIcon: Icon(Icons.person_outline, color: Color(0xFF4A90E2)),
+                          labelText: l10n.userTypeLabel,
+                          prefixIcon: const Icon(Icons.person_outline, color: Color(0xFF4A90E2)),
                         ),
                         items: [
-                          DropdownMenuItem(value: 'cliente', child: Text('Cliente')),
-                          DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                          DropdownMenuItem(value: 'cliente', child: Text(l10n.userTypeClient)),
+                          DropdownMenuItem(value: 'admin', child: Text(l10n.userTypeAdmin)),
                         ],
                         onChanged: (v) => setState(() => _tipoUsuario = v ?? 'cliente'),
-                        validator: (v) => (v == null || v.isEmpty) ? 'Selecciona el tipo de usuario' : null,
+                        validator: (v) => (v == null || v.isEmpty) ? l10n.userTypeRequired : null,
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
-                          labelText: 'Clave',
-                          prefixIcon: Icon(Icons.lock, color: Color(0xFF4A90E2)),
+                          labelText: l10n.password,
+                          prefixIcon: const Icon(Icons.lock, color: Color(0xFF4A90E2)),
                         ),
-                        validator: (v) => (v == null || v.isEmpty) ? 'Ingresa la clave' : null,
+                        validator: (v) => (v == null || v.isEmpty) ? l10n.passwordRequired : null,
                       ),
-                      SizedBox(height: 18),
+                      const SizedBox(height: 18),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _loading ? null : _submit,
                           style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                            backgroundColor: Color(0xFF4A90E2),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: const Color(0xFF4A90E2),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             elevation: 4,
                           ),
-                          child: _loading ? SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : Text('Registrarse', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: _loading
+                              ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : Text(l10n.registerButton, style: const TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],

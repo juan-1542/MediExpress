@@ -60,6 +60,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get frenchLabel => 'Français';
 
   @override
+  String get japaneseLabel => '日本語';
+
+  @override
   String get searchHint => 'Buscar medicamento, dosis o marca';
 
   @override

@@ -1,5 +1,7 @@
 {
   "@@locale": "pt",
+  "currency": "BRL",
+  "currencySymbol": "R$",
   "appTitle": "MediExpress",
   "hello": "Olá",
   "homeSubtitle": "Sua farmácia em minutos",

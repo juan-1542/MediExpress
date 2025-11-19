@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:medi_express_front/l10n/app_localizations.dart';
 
 // Uso opcional de servicio del proyecto para datos simulados (fallback)
 import '../Servicios/product_service.dart';
 import '../Servicios/cart_service.dart';
 import '../Servicios/distribution_service.dart';
+import '../Servicios/currency_service.dart';
 
 class PagoPantalla extends StatefulWidget {
   const PagoPantalla({super.key});
@@ -94,8 +94,7 @@ class _PagoPantallaState extends State<PagoPantalla> {
   }
 
   String _formatCurrency(BuildContext context, int value) {
-    final l10n = AppLocalizations.of(context)!;
-    return NumberFormat.currency(locale: l10n.localeName, symbol: '\$', decimalDigits: 0).format(value);
+    return CurrencyService.instance.formatPrice(value.toDouble(), context);
   }
 
   int get _total => _articulos.fold(0, (s, a) => s + _parsePrice(a['price'] ?? a['precio'] ?? a['valor'] ?? 0));

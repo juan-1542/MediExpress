@@ -9,6 +9,12 @@ class AppLocalizationsPt extends AppLocalizations {
   AppLocalizationsPt([String locale = 'pt']) : super(locale);
 
   @override
+  String get currency => 'BRL';
+
+  @override
+  String get currencySymbol => 'R\$';
+
+  @override
   String get appTitle => 'MediExpress';
 
   @override

@@ -10,6 +10,8 @@ import 'package:medi_express_front/Pantallas/Carrito.dart';
 import 'package:medi_express_front/Pantallas/Estado_Pedido.dart';
 import 'package:medi_express_front/Servicios/product_service.dart';
 import 'package:medi_express_front/Servicios/distribution_service.dart';
+import 'package:medi_express_front/Servicios/currency_service.dart';
+import 'package:medi_express_front/Servicios/locale_service.dart';
 import 'package:motion_tab_bar/MotionTabBar.dart';
 import 'package:motion_tab_bar/MotionTabBarController.dart';
 import 'package:medi_express_front/l10n/app_localizations.dart';
@@ -36,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late FocusNode _searchFocusNode;
   bool _searchFocused = false;
   late VoidCallback _focusNodeListener;
+  late VoidCallback _localeListener;
 
   @override
   void initState() {
@@ -54,6 +57,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
     };
     _searchFocusNode.addListener(_focusNodeListener);
+    
+    // Listener para reconstruir cuando cambie el idioma
+    _localeListener = () {
+      setState(() {});
+    };
+    LocaleService.instance.locale.addListener(_localeListener);
   }
 
   @override
@@ -64,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _searchFocusNode.removeListener(_focusNodeListener);
     _searchFocusNode.dispose();
     _searchController.dispose();
+    LocaleService.instance.locale.removeListener(_localeListener);
     super.dispose();
   }
 
@@ -304,8 +314,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    return Scaffold(
+    // Envolvemos con ValueListenableBuilder para reconstruir cuando cambie el idioma
+    return ValueListenableBuilder<Locale?>(
+      valueListenable: LocaleService.instance.locale,
+      builder: (context, locale, _) {
+        // Recalcular traducciones con el nuevo locale
+        final t = AppLocalizations.of(context);
+        // Usamos una Key para forzar recreación del Scaffold cuando cambia el idioma
+        return Scaffold(
+      key: ValueKey(locale?.languageCode ?? 'system'),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(80.0),
         child: Container(
@@ -648,12 +665,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         },
       ),
     );
+      },
+    );
   }
 
   Widget _buildMedicationCard(String name, String dosage, String price, String quantity, int index) {
     final t = AppLocalizations.of(context);
     final q = int.tryParse(quantity.toString()) ?? 0;
     final isAdmin = AuthService.instance.currentUser.value?.isAdmin ?? false;
+    
+    // Convertir precio a formato con divisa local
+    final priceValue = double.tryParse(price.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
+    final formattedPrice = CurrencyService.instance.formatPrice(priceValue, context);
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: Duration(milliseconds: 400 + (index.clamp(0, 10) * 40)),
@@ -744,7 +767,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(color: Color(0xFFEEF7FF), borderRadius: BorderRadius.circular(10)),
-                        child: Text(price, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
+                        child: Text(formattedPrice, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
                       ),
                       SizedBox(height: 8),
                       InkWell(

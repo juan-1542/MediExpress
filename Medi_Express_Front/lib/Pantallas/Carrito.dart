@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/cart_service.dart';
+import 'package:medi_express_front/Servicios/currency_service.dart';
 import 'package:medi_express_front/l10n/app_localizations.dart';
-import 'package:intl/intl.dart';
 
 class CarritoScreen extends StatefulWidget {
   const CarritoScreen({super.key});
@@ -17,9 +17,7 @@ class _CarritoScreenState extends State<CarritoScreen> {
   }
 
   String _formatPrice(BuildContext context, int value) {
-    final l10n = AppLocalizations.of(context)!;
-    final formatter = NumberFormat.currency(locale: l10n.localeName, symbol: '\$', decimalDigits: 0);
-    return formatter.format(value);
+    return CurrencyService.instance.formatPrice(value.toDouble(), context);
   }
 
   @override

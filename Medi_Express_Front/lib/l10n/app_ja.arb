@@ -1,5 +1,7 @@
 {
   "@@locale": "ja",
+  "currency": "JPY",
+  "currencySymbol": "¥",
   "appTitle": "MediExpress",
   "hello": "こんにちは",
   "homeSubtitle": "数分であなたの薬局",

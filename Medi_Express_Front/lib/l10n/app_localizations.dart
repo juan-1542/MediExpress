@@ -104,6 +104,18 @@ abstract class AppLocalizations {
     Locale('pt'),
   ];
 
+  /// No description provided for @currency.
+  ///
+  /// In en, this message translates to:
+  /// **'USD'**
+  String get currency;
+
+  /// No description provided for @currencySymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'\$'**
+  String get currencySymbol;
+
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:

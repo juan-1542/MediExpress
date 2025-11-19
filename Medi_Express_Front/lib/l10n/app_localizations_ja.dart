@@ -9,6 +9,12 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get currency => 'JPY';
+
+  @override
+  String get currencySymbol => '¥';
+
+  @override
   String get appTitle => 'MediExpress';
 
   @override

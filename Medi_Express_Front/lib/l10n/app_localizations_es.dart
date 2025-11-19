@@ -9,6 +9,12 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
+  String get currency => 'COP';
+
+  @override
+  String get currencySymbol => '\$';
+
+  @override
   String get appTitle => 'MediExpress';
 
   @override

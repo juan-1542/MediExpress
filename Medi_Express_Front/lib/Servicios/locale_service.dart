@@ -12,6 +12,7 @@ class LocaleService {
     Locale('es'),
     Locale('en'),
     Locale('pt'),
+    Locale('fr'),
   ];
 
   void setLocale(Locale? l) {

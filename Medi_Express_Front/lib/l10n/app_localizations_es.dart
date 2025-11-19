@@ -54,6 +54,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get englishLabel => 'English';
 
   @override
+  String get portugueseLabel => 'Português';
+
+  @override
   String get searchHint => 'Buscar medicamento, dosis o marca';
 
   @override
@@ -532,7 +535,6 @@ class AppLocalizationsEs extends AppLocalizations {
     return 'Añadido $count x $name al carrito';
   }
 
-  // Nuevos textos para la pantalla Producto
   @override
   String get productUsageTitle => 'Descripción y uso';
 
@@ -542,81 +544,118 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get defaultProductName => 'Producto';
 
-  // Textos Registro de Usuario
-  @override
-  String get addressRequired => 'Ingresa la dirección';
-  @override
-  String get emailRequired => 'Ingresa el correo';
-  @override
-  String get idRequired => 'Ingresa la cédula';
-  @override
-  String get nameRequired => 'Ingresa tu nombre';
-  @override
-  String get passwordRequired => 'Ingresa la clave';
-  @override
-  String get phoneRequired => 'Ingresa el teléfono';
-  @override
-  String get registerButton => 'Registrarse';
-  @override
-  String get registerSubtitle => 'Regístrate para comprar más rápido y guardar tus datos';
-  @override
-  String get registerTitle => 'Crear cuenta';
   @override
   String get registeredAddressFallback => 'Dirección registrada';
+
   @override
-  String get registrationAndLoginSuccess => 'Registro y login realizados con éxito';
+  String get registerTitle => 'Crear cuenta';
+
   @override
-  String get userAlreadyExists => 'Ya existe un usuario con ese correo';
-  @override
-  String get userTypeAdmin => 'Admin';
-  @override
-  String get userTypeClient => 'Cliente';
+  String get registerSubtitle =>
+      'Regístrate para comprar más rápido y guardar tus datos';
+
   @override
   String get userTypeLabel => 'Tipo de usuario';
+
+  @override
+  String get userTypeClient => 'Cliente';
+
+  @override
+  String get userTypeAdmin => 'Admin';
+
+  @override
+  String get nameRequired => 'Ingresa tu nombre';
+
+  @override
+  String get idRequired => 'Ingresa la cédula';
+
+  @override
+  String get phoneRequired => 'Ingresa el teléfono';
+
+  @override
+  String get emailRequired => 'Ingresa el correo';
+
+  @override
+  String get addressRequired => 'Ingresa la dirección';
+
   @override
   String get userTypeRequired => 'Selecciona el tipo de usuario';
 
-  // Textos Tarjeta de Crédito
+  @override
+  String get passwordRequired => 'Ingresa la clave';
+
+  @override
+  String get registerButton => 'Registrarse';
+
+  @override
+  String get userAlreadyExists => 'Ya existe un usuario con ese correo';
+
+  @override
+  String get registrationAndLoginSuccess =>
+      'Registro y login realizados con éxito';
+
   @override
   String get creditCardTitle => 'Tarjeta de crédito';
+
   @override
   String get creditCardImageFallback => 'Tarjeta';
+
   @override
   String get cardNumberLabel => 'Número de tarjeta';
+
   @override
   String get cardNumberHint => '1234123412341234';
+
   @override
   String get cardNumberInvalid => 'Número inválido';
+
   @override
   String get cardNumberExact16 => 'El número debe tener exactamente 16 dígitos';
+
   @override
   String get expiryLabel => 'Fecha de expiración (MM/AA)';
+
   @override
   String get expiryHint => 'MM/AA';
+
   @override
   String get expiryRequired => 'Fecha requerida';
+
   @override
   String get expiryInvalidFormat => 'Formato inválido (MM/AA)';
+
   @override
-  String get expirySameAsCurrent => 'La fecha no puede ser igual al mes/año actual';
+  String get expirySameAsCurrent =>
+      'La fecha no puede ser igual al mes/año actual';
+
   @override
   String get cvcLabel => 'Código CVC';
+
   @override
   String get cvcHint => '123';
+
   @override
   String get cvcInvalid => 'Código inválido';
+
   @override
   String get cvcExact3 => 'El CVC debe tener exactamente 3 dígitos';
+
   @override
   String get nameOnCardLabel => 'Nombre en la tarjeta';
+
   @override
   String get nameOnCardHint => 'Como aparece en la tarjeta';
+
   @override
   String get nameOnCardRequired => 'Nombre requerido';
+
   @override
   String get payButton => 'Pagar';
+
   @override
-  String get fixErrorsBeforeContinue => 'Corrige los errores antes de continuar';
+  String get fixErrorsBeforeContinue =>
+      'Corrige los errores antes de continuar';
+
   @override
   String get paymentSimulatedApproved => 'Pago simulado aprobado';
 }

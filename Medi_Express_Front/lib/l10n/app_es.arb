@@ -17,6 +17,7 @@
   "useSystemLanguage": "Usar idioma del sistema",
   "spanishLabel": "Español",
   "englishLabel": "English",
+  "portugueseLabel": "Português",
 
   "searchHint": "Buscar medicamento, dosis o marca",
   "filterByPrice": "Filtrar por precio",

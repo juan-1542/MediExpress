@@ -11,6 +11,7 @@ class LocaleService {
   static const supported = <Locale>[
     Locale('es'),
     Locale('en'),
+    Locale('pt'),
   ];
 
   void setLocale(Locale? l) {

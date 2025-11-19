@@ -7,6 +7,7 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
+import 'app_localizations_pt.dart';
 
 // ignore_for_file: type=lint
 
@@ -96,6 +97,7 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('es'),
+    Locale('pt'),
   ];
 
   /// No description provided for @appTitle.
@@ -187,6 +189,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get englishLabel;
+
+  /// No description provided for @portugueseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Portuguese'**
+  String get portugueseLabel;
 
   /// No description provided for @searchHint.
   ///
@@ -1088,53 +1096,244 @@ abstract class AppLocalizations {
   /// **'Added {count} x {name} to cart'**
   String addedToCartItems(Object count, Object name);
 
-  // Nuevos textos para la pantalla Producto
   /// No description provided for @productUsageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Description and use'**
   String get productUsageTitle;
+
   /// No description provided for @productDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Product details'**
   String get productDetailsTitle;
+
   /// No description provided for @defaultProductName.
+  ///
+  /// In en, this message translates to:
+  /// **'Product'**
   String get defaultProductName;
 
-  // Nuevos textos para la pantalla de registro de usuario
+  /// No description provided for @registeredAddressFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered address'**
   String get registeredAddressFallback;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
   String get registerTitle;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up to checkout faster and save your details'**
   String get registerSubtitle;
+
+  /// No description provided for @userTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'User type'**
   String get userTypeLabel;
+
+  /// No description provided for @userTypeClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Client'**
   String get userTypeClient;
+
+  /// No description provided for @userTypeAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
   String get userTypeAdmin;
+
+  /// No description provided for @nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name'**
   String get nameRequired;
+
+  /// No description provided for @idRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the ID'**
   String get idRequired;
+
+  /// No description provided for @phoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the phone'**
   String get phoneRequired;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the email'**
   String get emailRequired;
+
+  /// No description provided for @addressRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the address'**
   String get addressRequired;
+
+  /// No description provided for @userTypeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the user type'**
   String get userTypeRequired;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the password'**
   String get passwordRequired;
+
+  /// No description provided for @registerButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
   String get registerButton;
+
+  /// No description provided for @userAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A user with that email already exists'**
   String get userAlreadyExists;
+
+  /// No description provided for @registrationAndLoginSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration and login completed successfully'**
   String get registrationAndLoginSuccess;
 
-  // Textos para pantalla Tarjeta de Crédito
+  /// No description provided for @creditCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card'**
   String get creditCardTitle;
+
+  /// No description provided for @creditCardImageFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
   String get creditCardImageFallback;
+
+  /// No description provided for @cardNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Card number'**
   String get cardNumberLabel;
+
+  /// No description provided for @cardNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1234123412341234'**
   String get cardNumberHint;
+
+  /// No description provided for @cardNumberInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid number'**
   String get cardNumberInvalid;
+
+  /// No description provided for @cardNumberExact16.
+  ///
+  /// In en, this message translates to:
+  /// **'The number must be exactly 16 digits'**
   String get cardNumberExact16;
+
+  /// No description provided for @expiryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiration date (MM/YY)'**
   String get expiryLabel;
+
+  /// No description provided for @expiryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'MM/YY'**
   String get expiryHint;
+
+  /// No description provided for @expiryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Date required'**
   String get expiryRequired;
+
+  /// No description provided for @expiryInvalidFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid format (MM/YY)'**
   String get expiryInvalidFormat;
+
+  /// No description provided for @expirySameAsCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'The date cannot be the same as the current month/year'**
   String get expirySameAsCurrent;
+
+  /// No description provided for @cvcLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'CVC code'**
   String get cvcLabel;
+
+  /// No description provided for @cvcHint.
+  ///
+  /// In en, this message translates to:
+  /// **'123'**
   String get cvcHint;
+
+  /// No description provided for @cvcInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid code'**
   String get cvcInvalid;
+
+  /// No description provided for @cvcExact3.
+  ///
+  /// In en, this message translates to:
+  /// **'The CVC must be exactly 3 digits'**
   String get cvcExact3;
+
+  /// No description provided for @nameOnCardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name on card'**
   String get nameOnCardLabel;
+
+  /// No description provided for @nameOnCardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'As it appears on the card'**
   String get nameOnCardHint;
+
+  /// No description provided for @nameOnCardRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name required'**
   String get nameOnCardRequired;
+
+  /// No description provided for @payButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay'**
   String get payButton;
+
+  /// No description provided for @fixErrorsBeforeContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the errors before continuing'**
   String get fixErrorsBeforeContinue;
+
+  /// No description provided for @paymentSimulatedApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Simulated payment approved'**
   String get paymentSimulatedApproved;
 }
 
@@ -1149,7 +1348,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'es'].contains(locale.languageCode);
+      <String>['en', 'es', 'pt'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1162,6 +1361,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEn();
     case 'es':
       return AppLocalizationsEs();
+    case 'pt':
+      return AppLocalizationsPt();
   }
 
   throw FlutterError(

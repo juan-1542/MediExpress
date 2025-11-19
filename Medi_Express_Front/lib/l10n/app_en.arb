@@ -17,6 +17,7 @@
   "useSystemLanguage": "Use system language",
   "spanishLabel": "Spanish",
   "englishLabel": "English",
+  "portugueseLabel": "Portuguese",
 
   "searchHint": "Search medicine, dosage or brand",
   "filterByPrice": "Filter by price",
@@ -203,12 +204,10 @@
   "addedToCartItems": "Added {count} x {name} to cart",
   "@addedToCartItems": {"placeholders": {"count": {}, "name": {}}},
 
-  // New texts for Product screen
   "productUsageTitle": "Description and use",
   "productDetailsTitle": "Product details",
   "defaultProductName": "Product",
 
-  // New texts for User registration screen
   "registeredAddressFallback": "Registered address",
   "registerTitle": "Create account",
   "registerSubtitle": "Sign up to checkout faster and save your details",
@@ -226,7 +225,6 @@
   "userAlreadyExists": "A user with that email already exists",
   "registrationAndLoginSuccess": "Registration and login completed successfully",
 
-  // New texts for Credit Card screen
   "creditCardTitle": "Credit card",
   "creditCardImageFallback": "Card",
   "cardNumberLabel": "Card number",

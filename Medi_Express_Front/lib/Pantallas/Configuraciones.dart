@@ -62,6 +62,13 @@ class _ConfiguracionesScreenState extends State<ConfiguracionesScreen> {
                   title: Text(t?.englishLabel ?? 'English'),
                   onChanged: _changeLocale,
                 ),
+                const Divider(height: 0),
+                RadioListTile<Locale?>(
+                  value: const Locale('pt'),
+                  groupValue: _selected,
+                  title: Text(t?.portugueseLabel ?? 'Português'),
+                  onChanged: _changeLocale,
+                ),
               ],
             ),
           ),

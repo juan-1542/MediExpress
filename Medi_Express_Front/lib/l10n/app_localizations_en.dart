@@ -54,6 +54,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get englishLabel => 'English';
 
   @override
+  String get portugueseLabel => 'Portuguese';
+
+  @override
   String get searchHint => 'Search medicine, dosage or brand';
 
   @override
@@ -527,7 +530,6 @@ class AppLocalizationsEn extends AppLocalizations {
     return 'Added $count x $name to cart';
   }
 
-  // New texts for Product screen
   @override
   String get productUsageTitle => 'Description and use';
 
@@ -537,81 +539,117 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get defaultProductName => 'Product';
 
-  // New texts for User registration screen
   @override
   String get registeredAddressFallback => 'Registered address';
+
   @override
   String get registerTitle => 'Create account';
+
   @override
-  String get registerSubtitle => 'Sign up to checkout faster and save your details';
+  String get registerSubtitle =>
+      'Sign up to checkout faster and save your details';
+
   @override
   String get userTypeLabel => 'User type';
+
   @override
   String get userTypeClient => 'Client';
+
   @override
   String get userTypeAdmin => 'Admin';
+
   @override
   String get nameRequired => 'Enter your name';
+
   @override
   String get idRequired => 'Enter the ID';
+
   @override
   String get phoneRequired => 'Enter the phone';
+
   @override
   String get emailRequired => 'Enter the email';
+
   @override
   String get addressRequired => 'Enter the address';
+
   @override
   String get userTypeRequired => 'Select the user type';
+
   @override
   String get passwordRequired => 'Enter the password';
+
   @override
   String get registerButton => 'Sign up';
+
   @override
   String get userAlreadyExists => 'A user with that email already exists';
-  @override
-  String get registrationAndLoginSuccess => 'Registration and login completed successfully';
 
-  // New texts for Credit Card screen
+  @override
+  String get registrationAndLoginSuccess =>
+      'Registration and login completed successfully';
+
   @override
   String get creditCardTitle => 'Credit card';
+
   @override
   String get creditCardImageFallback => 'Card';
+
   @override
   String get cardNumberLabel => 'Card number';
+
   @override
   String get cardNumberHint => '1234123412341234';
+
   @override
   String get cardNumberInvalid => 'Invalid number';
+
   @override
   String get cardNumberExact16 => 'The number must be exactly 16 digits';
+
   @override
   String get expiryLabel => 'Expiration date (MM/YY)';
+
   @override
   String get expiryHint => 'MM/YY';
+
   @override
   String get expiryRequired => 'Date required';
+
   @override
   String get expiryInvalidFormat => 'Invalid format (MM/YY)';
+
   @override
-  String get expirySameAsCurrent => 'The date cannot be the same as the current month/year';
+  String get expirySameAsCurrent =>
+      'The date cannot be the same as the current month/year';
+
   @override
   String get cvcLabel => 'CVC code';
+
   @override
   String get cvcHint => '123';
+
   @override
   String get cvcInvalid => 'Invalid code';
+
   @override
   String get cvcExact3 => 'The CVC must be exactly 3 digits';
+
   @override
   String get nameOnCardLabel => 'Name on card';
+
   @override
   String get nameOnCardHint => 'As it appears on the card';
+
   @override
   String get nameOnCardRequired => 'Name required';
+
   @override
   String get payButton => 'Pay';
+
   @override
   String get fixErrorsBeforeContinue => 'Fix the errors before continuing';
+
   @override
   String get paymentSimulatedApproved => 'Simulated payment approved';
 }

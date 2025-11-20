@@ -702,4 +702,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get paymentSimulatedApproved => 'Paiement simulé approuvé';
+
+  @override
+  String get pendingOrders => 'Commandes en attente';
 }

@@ -259,5 +259,7 @@
   "nameOnCardRequired": "Nome obrigatório",
   "payButton": "Pagar",
   "fixErrorsBeforeContinue": "Corrija os erros antes de continuar",
-  "paymentSimulatedApproved": "Pagamento simulado aprovado"
+  "paymentSimulatedApproved": "Pagamento simulado aprovado",
+
+  "pendingOrders": "Pedidos pendentes"
 }

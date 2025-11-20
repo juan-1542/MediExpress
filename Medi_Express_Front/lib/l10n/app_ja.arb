@@ -259,5 +259,6 @@
   "nameOnCardRequired": "名前が必要です",
   "payButton": "支払い",
   "fixErrorsBeforeContinue": "続行する前にエラーを修正",
-  "paymentSimulatedApproved": "シミュレートされた支払いが承認されました"
+  "paymentSimulatedApproved": "シミュレートされた支払いが承認されました",
+  "pendingOrders": "保留中の注文"
 }

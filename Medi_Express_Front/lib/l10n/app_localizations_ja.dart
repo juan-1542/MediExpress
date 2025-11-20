@@ -687,4 +687,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get paymentSimulatedApproved => 'シミュレートされた支払いが承認されました';
+
+  @override
+  String get pendingOrders => '保留中の注文';
 }

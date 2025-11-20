@@ -1423,6 +1423,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Simulated payment approved'**
   String get paymentSimulatedApproved;
+
+  /// No description provided for @pendingOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending orders'**
+  String get pendingOrders;
 }
 
 class _AppLocalizationsDelegate

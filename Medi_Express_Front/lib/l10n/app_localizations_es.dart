@@ -700,4 +700,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get paymentSimulatedApproved => 'Pago simulado aprobado';
+
+  @override
+  String get pendingOrders => 'Pedidos pendientes';
 }

@@ -116,7 +116,7 @@ class _AdminScreenState extends State<AdminScreen> {
               ElevatedButton.icon(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PedidosScreen())),
                 icon: Icon(Icons.receipt_long, color: Colors.white),
-                label: Text('Pedidos pendientes'),
+                label: Text(t?.pendingOrders ?? 'Pedidos pendientes'),
                 style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF4A90E2), padding: EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
               ),
 

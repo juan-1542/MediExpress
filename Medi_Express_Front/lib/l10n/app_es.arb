@@ -257,5 +257,6 @@
   "nameOnCardRequired": "Nombre requerido",
   "payButton": "Pagar",
   "fixErrorsBeforeContinue": "Corrige los errores antes de continuar",
-  "paymentSimulatedApproved": "Pago simulado aprobado"
+  "paymentSimulatedApproved": "Pago simulado aprobado",
+  "pendingOrders": "Pedidos pendientes"
 }

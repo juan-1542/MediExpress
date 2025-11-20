@@ -259,5 +259,6 @@
   "nameOnCardRequired": "Name required",
   "payButton": "Pay",
   "fixErrorsBeforeContinue": "Fix the errors before continuing",
-  "paymentSimulatedApproved": "Simulated payment approved"
+  "paymentSimulatedApproved": "Simulated payment approved",
+  "pendingOrders": "Pending orders"
 }

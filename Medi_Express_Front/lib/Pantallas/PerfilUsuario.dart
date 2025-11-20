@@ -4,7 +4,7 @@ import 'package:medi_express_front/l10n/app_localizations.dart';
 
 class PerfilUsuarioScreen extends StatefulWidget {
   final dynamic usuario;
-  const PerfilUsuarioScreen({Key? key, required this.usuario}) : super(key: key);
+  const PerfilUsuarioScreen({super.key, required this.usuario});
 
   @override
   State<PerfilUsuarioScreen> createState() => _PerfilUsuarioScreenState();

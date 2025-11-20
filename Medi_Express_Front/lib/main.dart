@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'Pantallas/Login.dart';
 import 'Pantallas/Pago.dart';
 import 'Pantallas/TarjetaCreditoPantalla.dart';

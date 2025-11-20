@@ -144,8 +144,8 @@ class EstadoPedidoScreen extends StatelessWidget {
                         ),
                         child: Center(
                           child: Icon(
-                            status == l10n.noOrders || orderId == '0' 
-                              ? Icons.inbox_outlined 
+                            status == l10n.noOrders || orderId == '0'
+                              ? Icons.inbox_outlined
                               : Icons.check_circle,
                             color: Colors.white,
                             size: 64,

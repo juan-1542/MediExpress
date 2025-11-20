@@ -10,6 +10,7 @@ import 'package:medi_express_front/Pantallas/Carrito.dart';
 import 'package:medi_express_front/Pantallas/Estado_Pedido.dart';
 import 'package:medi_express_front/Servicios/product_service.dart';
 import 'package:medi_express_front/Servicios/distribution_service.dart';
+import 'package:medi_express_front/Servicios/order_service.dart';
 import 'package:medi_express_front/Servicios/currency_service.dart';
 import 'package:medi_express_front/Servicios/locale_service.dart';
 import 'package:motion_tab_bar/MotionTabBar.dart';
@@ -158,9 +159,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
     // Si el usuario toca el botón Estado (índice 1), navegar a la pantalla de estado de pedido
     if (index == 1) {
-      // Si no hay pedido reciente mostramos un estado por defecto
       final t = AppLocalizations.of(context);
-      Navigator.push(context, MaterialPageRoute(builder: (_) => EstadoPedidoScreen(orderId: '0', status: t?.noOrders ?? 'Sin pedidos')));
+      final latest = OrderService.instance.latestOrderId.value;
+      if (latest != null && latest.isNotEmpty) {
+        // Pasar sólo el orderId: EstadoPedidoScreen consultará OrderService
+        Navigator.push(context, MaterialPageRoute(builder: (_) => EstadoPedidoScreen(orderId: latest)));
+      } else {
+        // Sin pedido reciente, mostrar mensaje por defecto
+        Navigator.push(context, MaterialPageRoute(builder: (_) => EstadoPedidoScreen(orderId: '0', status: t?.noOrders ?? 'Sin pedidos')));
+      }
     }
     // Si el usuario toca Perfil (índice 3), navegar a la pantalla de perfil
     else if (index == 3) {
@@ -843,50 +850,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.0, end: 1.0),
-                  duration: Duration(milliseconds: 600),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, v, child) {
-                    return Opacity(
-                      opacity: v,
-                      child: Transform.scale(
-                        scale: 0.8 + (0.2 * v),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFFEEF7FF), Color(0xFFDCEEFF)],
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0xFF4A90E2).withValues(alpha: 0.2),
-                          blurRadius: 20,
-                          offset: Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.store_mall_directory_outlined,
-                      size: 64,
-                      color: Color(0xFF4A90E2),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 24),
-                Text(
-                  t?.noStoreInfo ?? 'No hay información de locales',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Icon(Icons.store_mall_directory_outlined, size: 64, color: Color(0xFF4A90E2)),
+                SizedBox(height: 12),
+                Text(t?.noStoreInfo ?? 'No hay información de locales', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
               ],
             ),
           );
@@ -899,320 +865,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFEEF7FF), Color(0xFFDCEEFF)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                gradient: LinearGradient(colors: [Color(0xFFEEF7FF), Color(0xFFDCEEFF)]),
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: Offset(0, 4))],
               ),
               child: Row(
                 children: [
                   Container(
                     padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0xFF4A90E2).withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
+                    decoration: BoxDecoration(gradient: LinearGradient(colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)]), borderRadius: BorderRadius.circular(12)),
                     child: Icon(Icons.store, color: Colors.white, size: 28),
                   ),
-                  SizedBox(width: 16),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          t?.localesTitle ?? 'Locales',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF123A5A),
-                          ),
-                        ),
+                        Text(t?.localesTitle ?? 'Locales', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
                         SizedBox(height: 4),
-                        Text(
-                          '${points.length} ${t?.localesSubtitle ?? 'locales disponibles'}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Text('${points.length} ${t?.localesSubtitle ?? 'locales disponibles'}', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 20),
-            // Lista de locales
+            SizedBox(height: 12),
             Expanded(
               child: ListView.builder(
                 itemCount: points.length,
                 itemBuilder: (context, index) {
                   final store = points[index];
                   final isActive = DistributionService.instance.info.value?.name == store.name;
-                  
-                  return TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0.0, end: 1.0),
-                    duration: Duration(milliseconds: 400 + (index * 100)),
-                    curve: Curves.easeOutCubic,
-                    builder: (context, v, child) {
-                      return Opacity(
-                        opacity: v,
-                        child: Transform.translate(
-                          offset: Offset(0, 20 * (1 - v)),
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: Container(
-                      margin: EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: isActive 
-                            ? [Color(0xFFEEF7FF), Color(0xFFDCEEFF)]
-                            : [Colors.white, Color(0xFFFAFDFF)],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isActive 
-                            ? Color(0xFF4A90E2).withValues(alpha: 0.5)
-                            : Colors.grey.withValues(alpha: 0.1),
-                          width: isActive ? 2 : 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: isActive
-                              ? Color(0xFF4A90E2).withValues(alpha: 0.15)
-                              : Colors.black.withValues(alpha: 0.04),
-                            blurRadius: isActive ? 15 : 10,
-                            offset: Offset(0, isActive ? 6 : 4),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            // Cambiar el local activo
-                            DistributionService.instance.setInfo(store);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('${t?.storeSelected ?? 'Local seleccionado'}: ${store.name}'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 56,
-                                      height: 56,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: isActive 
-                                            ? [Color(0xFF4A90E2), Color(0xFF3B82F6)]
-                                            : [Color(0xFFEEF7FF), Color(0xFFDCEEFF)],
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Center(
-                                        child: Icon(
-                                          Icons.storefront,
-                                          color: isActive ? Colors.white : Color(0xFF4A90E2),
-                                          size: 28,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  store.name,
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Color(0xFF123A5A),
-                                                  ),
-                                                ),
-                                              ),
-                                              if (isActive)
-                                                Container(
-                                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                                  decoration: BoxDecoration(
-                                                    gradient: LinearGradient(
-                                                      colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)],
-                                                    ),
-                                                    borderRadius: BorderRadius.circular(12),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      Icon(Icons.check, color: Colors.white, size: 14),
-                                                      SizedBox(width: 4),
-                                                      Text(
-                                                        t?.active ?? 'Activo',
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 12,
-                                                          fontWeight: FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 4),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              gradient: store.available
-                                                ? LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)])
-                                                : LinearGradient(colors: [Color(0xFFF44336), Color(0xFFEF5350)]),
-                                              borderRadius: BorderRadius.circular(12),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: (store.available ? Colors.green : Colors.red).withValues(alpha: 0.3),
-                                                  blurRadius: 4,
-                                                  offset: Offset(0, 2),
-                                                ),
-                                              ],
-                                            ),
-                                            child: Text(
-                                              store.available ? (t?.available ?? 'Disponible') : (t?.notAvailable ?? 'No disponible'),
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 16),
-                                Divider(height: 1, color: Colors.grey.withValues(alpha: 0.2)),
-                                SizedBox(height: 16),
-                                // Dirección
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFFEEF7FF),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Icon(
-                                        Icons.location_on,
-                                        color: Color(0xFF4A90E2),
-                                        size: 20,
-                                      ),
-                                    ),
-                                    SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            t?.addressLabel ?? 'Dirección',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey[600],
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          SizedBox(height: 2),
-                                          Text(
-                                            store.address,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Color(0xFF123A5A),
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 12),
-                                // Horario
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFFEEF7FF),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Icon(
-                                        Icons.access_time,
-                                        color: Color(0xFF4A90E2),
-                                        size: 20,
-                                      ),
-                                    ),
-                                    SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            t?.scheduleLabel ?? 'Horario',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey[600],
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          SizedBox(height: 2),
-                                          Text(
-                                            store.openingHours,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Color(0xFF123A5A),
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                  return Card(
+                    margin: EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      leading: Icon(Icons.storefront, color: isActive ? Color(0xFF4A90E2) : Colors.grey[700]),
+                      title: Text(store.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(store.address),
+                      trailing: isActive ? Icon(Icons.check, color: Color(0xFF4A90E2)) : null,
+                      onTap: () {
+                        DistributionService.instance.setInfo(store);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${t?.storeSelected ?? 'Local seleccionado'}: ${store.name}')));
+                      },
                     ),
                   );
                 },

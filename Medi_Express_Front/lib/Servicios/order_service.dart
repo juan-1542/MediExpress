@@ -8,12 +8,21 @@ class OrderService {
   /// pueda reaccionar automáticamente a cambios.
   final ValueNotifier<List<Map<String, String>>> pendingOrders = ValueNotifier(<Map<String, String>>[]);
 
+  /// ID del último pedido creado (útil para que la pantalla de estado muestre
+  /// el pedido más reciente aunque el usuario cierre sesión). Nullable.
+  final ValueNotifier<String?> latestOrderId = ValueNotifier<String?>(null);
+
   /// Añade un pedido al listado de pendientes (al inicio por defecto)
   /// Normaliza la estructura para incluir 'status' y 'courier'.
   void addOrder(Map<String, String> order, {bool atStart = true}) {
     final normalized = Map<String, String>.from(order);
     normalized['status'] = normalized['status'] ?? 'pendiente';
     normalized['courier'] = normalized['courier'] ?? '';
+    // Si el pedido tiene id, actualizar latestOrderId para que la pantalla de estado
+    // pueda mostrar el último pedido incluso después de logout.
+    if (normalized['id'] != null && normalized['id']!.isNotEmpty) {
+      latestOrderId.value = normalized['id'];
+    }
 
     final list = List<Map<String, String>>.from(pendingOrders.value);
     if (atStart) list.insert(0, normalized);
@@ -33,22 +42,29 @@ class OrderService {
     });
     list[idx] = existing;
     pendingOrders.value = list;
+    // Si se actualiza el último pedido, refrescar latestOrderId (no cambia el valor
+    // pero garantiza que cualquier escucha lo pueda usar). No es estrictamente
+    // necesario, pero lo dejamos por coherencia.
+    if (latestOrderId.value == id) latestOrderId.value = id;
     return true;
   }
 
   /// Recupera un pedido por id o null si no existe
   Map<String, String>? getOrderById(String id) {
-    return pendingOrders.value.firstWhere((p) => p['id'] == id, orElse: () => <String, String>{})?.isEmpty == true ? null : pendingOrders.value.firstWhere((p) => p['id'] == id, orElse: () => {});
+    final list = pendingOrders.value;
+    final idx = list.indexWhere((p) => p['id'] == id);
+    if (idx < 0) return null;
+    return Map<String, String>.from(list[idx]);
   }
 
   /// Eliminar un pedido por id
   bool removeOrderById(String id) {
     final list = List<Map<String, String>>.from(pendingOrders.value);
-    final removed = list.removeWhere((p) => p['id'] == id);
-    // removeWhere returns void; recompute presence
-    final exists = list.any((p) => p['id'] == id);
+    final initialLength = list.length;
+    list.removeWhere((p) => p['id'] == id);
+    final removed = list.length < initialLength;
     pendingOrders.value = list;
-    return !exists;
+    return removed;
   }
 
   /// Limpia todos los pedidos pendientes (útil para pruebas)

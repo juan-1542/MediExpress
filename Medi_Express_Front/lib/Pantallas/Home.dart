@@ -44,6 +44,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    // Cargar pedidos persistidos (si los hay) para mantener el estado entre sesiones
+    Future.microtask(() async {
+      await OrderService.instance.loadFromStorage();
+      // Forzar reconstrucción para reflejar cualquier pedido cargado
+      setState(() {});
+    });
     _motionTabBarController = MotionTabBarController(
       initialIndex: 0,
       length: 4,
@@ -160,7 +166,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Si el usuario toca el botón Estado (índice 1), navegar a la pantalla de estado de pedido
     if (index == 1) {
       final t = AppLocalizations.of(context);
-      final latest = OrderService.instance.latestOrderId.value;
+      // Priorizar pedidos entregados (status == 'finalizado'), luego llegadas (arrived == 'true'), luego latestOrderId
+      final orders = OrderService.instance.pendingOrders.value;
+      final finalizedOrder = orders.firstWhere((o) => (o['status'] ?? '') == 'finalizado', orElse: () => <String, String>{});
+      final arrivedOrder = orders.firstWhere((o) => (o['arrived'] ?? 'false') == 'true', orElse: () => <String, String>{});
+      final pickedId = finalizedOrder.isNotEmpty ? finalizedOrder['id'] : (arrivedOrder.isNotEmpty ? arrivedOrder['id'] : null);
+      final latest = pickedId ?? OrderService.instance.latestOrderId.value;
       if (latest != null && latest.isNotEmpty) {
         // Pasar sólo el orderId: EstadoPedidoScreen consultará OrderService
         Navigator.push(context, MaterialPageRoute(builder: (_) => EstadoPedidoScreen(orderId: latest)));

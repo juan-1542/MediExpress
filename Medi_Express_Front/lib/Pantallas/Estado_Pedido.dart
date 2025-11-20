@@ -25,12 +25,14 @@ class _EstadoPedidoScreenState extends State<EstadoPedidoScreen> {
       final courier = order['courier'] ?? '';
       final arrived = (order['arrived'] ?? 'false') == 'true';
 
-      if (st == 'en camino') {
-        displayStatus = 'Tu pedido se encuentra en camino, salió del punto ${dispatchPoint.isNotEmpty ? dispatchPoint : 'desconocido'} y el repartidor es ${courier.isNotEmpty ? courier : 'desconocido'}';
-      } else if (arrived) {
-        displayStatus = 'Tu domiciliario ha llegado, ve a recoger tu pedido';
-      } else if (st == 'finalizado') {
+      // Priorizar pedido finalizado (entregado), luego arrived, luego 'en camino'.
+      if (st == 'finalizado') {
         displayStatus = 'Tu pedido ha sido entregado en tu ubicación';
+      } else if (arrived) {
+        // Mensaje corregido y con mayúscula inicial
+        displayStatus = 'Tu domiciliario ha llegado, ve y recoge el pedido';
+      } else if (st == 'en camino') {
+        displayStatus = 'Tu pedido se encuentra en camino, salió del punto ${dispatchPoint.isNotEmpty ? dispatchPoint : 'desconocido'} y el repartidor es ${courier.isNotEmpty ? courier : 'desconocido'}';
       } else {
         displayStatus = widget.status ?? l10n.noOrders;
       }
@@ -127,262 +129,265 @@ class _EstadoPedidoScreenState extends State<EstadoPedidoScreen> {
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 20),
-                    // Icono de estado con animación y gradiente mejorado
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      duration: Duration(milliseconds: 600),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, v, child) {
-                        return Opacity(
-                          opacity: v,
-                          child: Transform.scale(
-                            scale: 0.7 + 0.3 * v,
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(60),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0xFF4A90E2).withValues(alpha: 0.4),
-                              blurRadius: 20,
-                              offset: Offset(0, 10),
+                child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 20),
+                      // Icono de estado con animación y gradiente mejorado
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 600),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, v, child) {
+                          return Opacity(
+                            opacity: v,
+                            child: Transform.scale(
+                              scale: 0.7 + 0.3 * v,
+                              child: child,
                             ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(50),
+                          );
+                        },
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            child: Center(
-                              child: Icon(
-                                widget.status == l10n.noOrders || widget.orderId == '0'
-                                  ? Icons.inbox_outlined
-                                  : Icons.check_circle,
-                                color: Colors.white,
-                                size: 64,
+                            borderRadius: BorderRadius.circular(60),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFF4A90E2).withValues(alpha: 0.4),
+                                blurRadius: 20,
+                                offset: Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  widget.status == l10n.noOrders || widget.orderId == '0'
+                                    ? Icons.inbox_outlined
+                                    : Icons.check_circle,
+                                  color: Colors.white,
+                                  size: 64,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 28),
-                    // Estado del pedido
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      duration: Duration(milliseconds: 700),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, v, child) {
-                        return Opacity(
-                          opacity: v,
-                          child: Transform.translate(
-                            offset: Offset(0, 20 * (1 - v)),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: Text(
-                        displayStatus,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF123A5A),
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      duration: Duration(milliseconds: 800),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, v, child) {
-                        return Opacity(
-                          opacity: v,
-                          child: child,
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFFEEF7FF), Color(0xFFDCEEFF)],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
+                      SizedBox(height: 28),
+                      // Estado del pedido
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 700),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, v, child) {
+                          return Opacity(
+                            opacity: v,
+                            child: Transform.translate(
+                              offset: Offset(0, 20 * (1 - v)),
+                              child: child,
+                            ),
+                          );
+                        },
                         child: Text(
-                          l10n.orderLabel(widget.orderId),
+                          displayStatus,
+                          textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Color(0xFF4A90E2),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF123A5A),
+                            letterSpacing: 0.3,
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 32),
-                    // Card con información detallada
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      duration: Duration(milliseconds: 900),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, v, child) {
-                        return Opacity(
-                          opacity: v,
-                          child: Transform.translate(
-                            offset: Offset(0, 30 * (1 - v)),
+                      SizedBox(height: 12),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 800),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, v, child) {
+                          return Opacity(
+                            opacity: v,
                             child: child,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
-                              blurRadius: 15,
-                              offset: Offset(0, 8),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFFEEF7FF), Color(0xFFDCEEFF)],
                             ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)],
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Color(0xFF4A90E2).withValues(alpha: 0.3),
-                                            blurRadius: 8,
-                                            offset: Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Icon(Icons.info_outline, color: Colors.white, size: 24),
-                                    ),
-                                    SizedBox(width: 12),
-                                    Text(
-                                      l10n.summaryTitle,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 18,
-                                        color: Color(0xFF123A5A),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 20),
-                                _buildInfoRow(Icons.payment, l10n.paymentProcessed, context),
-                                SizedBox(height: 12),
-                                _buildInfoRow(Icons.notifications_active, l10n.willNotify, context),
-                              ],
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            l10n.orderLabel(widget.orderId),
+                            style: TextStyle(
+                              color: Color(0xFF4A90E2),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    Spacer(),
-                    // Botón de regreso mejorado
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      duration: Duration(milliseconds: 1000),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, v, child) {
-                        return Opacity(
-                          opacity: v,
-                          child: Transform.translate(
-                            offset: Offset(0, 20 * (1 - v)),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0xFF4A90E2).withValues(alpha: 0.3),
-                              blurRadius: 12,
-                              offset: Offset(0, 6),
+                      SizedBox(height: 32),
+                      // Card con información detallada
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 900),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, v, child) {
+                          return Opacity(
+                            opacity: v,
+                            child: Transform.translate(
+                              offset: Offset(0, 30 * (1 - v)),
+                              child: child,
                             ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {
-                              // Ir a la pantalla Home sin borrar los pedidos. Usamos
-                              // pushReplacement para reemplazar esta pantalla y evitar
-                              // volver aquí con el back button.
-                              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
-                            },
-                            borderRadius: BorderRadius.circular(16),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(colors: [Color(0xFFF8FBFF), Color(0xFFFAFEFF)]),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.06),
+                                blurRadius: 15,
+                                offset: Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(Icons.home, color: Colors.white, size: 24),
-                                  SizedBox(width: 12),
-                                  Text(
-                                    l10n.backToHome,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)],
+                                          ),
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Color(0xFF4A90E2).withValues(alpha: 0.3),
+                                              blurRadius: 8,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Icon(Icons.info_outline, color: Colors.white, size: 24),
+                                      ),
+                                      SizedBox(width: 12),
+                                      Text(
+                                        l10n.summaryTitle,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 18,
+                                          color: Color(0xFF123A5A),
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                  SizedBox(height: 20),
+                                  _buildInfoRow(Icons.payment, l10n.paymentProcessed, context),
+                                  SizedBox(height: 12),
+                                  _buildInfoRow(Icons.notifications_active, l10n.willNotify, context),
                                 ],
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 20),
-                  ],
+                      SizedBox(height: 24),
+                      // Botón de regreso mejorado
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 1000),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, v, child) {
+                          return Opacity(
+                            opacity: v,
+                            child: Transform.translate(
+                              offset: Offset(0, 20 * (1 - v)),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFF4A90E2), Color(0xFF3B82F6)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFF4A90E2).withValues(alpha: 0.3),
+                                blurRadius: 12,
+                                offset: Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                // Ir a la pantalla Home sin borrar los pedidos. Usamos
+                                // pushReplacement para reemplazar esta pantalla y evitar
+                                // volver aquí con el back button.
+                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
+                              },
+                              borderRadius: BorderRadius.circular(16),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.home, color: Colors.white, size: 24),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      l10n.backToHome,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-          ),
+               ),
+             ),
+           ),
         );
       },
     );

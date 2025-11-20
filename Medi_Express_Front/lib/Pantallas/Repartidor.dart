@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
 import 'package:medi_express_front/Servicios/order_service.dart';
 import 'package:medi_express_front/Pantallas/Login.dart';
+import 'dart:math' as math;
 
 class RepartidorScreen extends StatefulWidget {
   const RepartidorScreen({super.key});
@@ -102,7 +103,9 @@ class _RepartidorScreenState extends State<RepartidorScreen> {
                     builder: (_, orders, __) {
                       final assigned = orders.where((o) => (o['courier'] ?? '') == (user?.fullName ?? 'Repartidor Demo')).toList();
                       if (assigned.isEmpty) return Center(child: Text('No hay pedidos asignados'));
+                      final bottomPad = math.max(MediaQuery.of(context).viewPadding.bottom, kBottomNavigationBarHeight);
                       return ListView.separated(
+                        padding: EdgeInsets.only(bottom: bottomPad + 24),
                         itemCount: assigned.length,
                         separatorBuilder: (_, __) => SizedBox(height: 10),
                         itemBuilder: (context, idx) {
@@ -110,77 +113,51 @@ class _RepartidorScreenState extends State<RepartidorScreen> {
                           final arrived = o['arrived'] == 'true';
                           return Container(
                             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 6, offset: Offset(0,3))]),
-                            child: ListTile(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              title: Text('Pedido #${o['id']}', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
-                              subtitle: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  SizedBox(height: 6),
-                                  Text('Cliente: ${o['customer'] ?? ''}'),
-                                  Text('Total: ${o['total'] ?? ''}'),
-                                  Text('Punto: ${o['dispatchPoint'] ?? ''}'),
-                                ],
-                              ),
-                              trailing: ConstrainedBox(
-                                constraints: BoxConstraints(minWidth: 120, maxWidth: 140, minHeight: 56, maxHeight: 84),
-                                child: LayoutBuilder(builder: (trCtx, trConstr) {
-                                  final availableH = trConstr.maxHeight;
-                                  final double neededH = 36.0 * 2 + 6.0; // dos botones de 36 + spacing
-                                  final buttonStyle = ElevatedButton.styleFrom(
-                                    fixedSize: Size(120, 36),
-                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  );
-
-                                  if (availableH >= neededH) {
-                                    // suficiente altura: mostrar botones verticales con el mismo tamaño
-                                    return Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.min,
+                                  // Left: title + details
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        ElevatedButton.icon(
-                                          onPressed: arrived
-                                              ? null
-                                              : () {
-                                                  OrderService.instance.updateOrder(o['id'] ?? '', {'arrived': 'true'});
-                                                },
-                                          icon: Icon(Icons.location_on, size: 18),
-                                          label: Text(arrived ? 'Ya llegué' : 'Marcar llegada', style: TextStyle(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                          style: buttonStyle,
-                                        ),
+                                        Text('Pedido #${o['id']}', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
                                         SizedBox(height: 6),
-                                        ElevatedButton.icon(
-                                          onPressed: arrived
-                                              ? () {
-                                                  OrderService.instance.updateOrder(o['id'] ?? '', {'status': 'finalizado'});
-                                                }
-                                              : null,
-                                          icon: Icon(Icons.check, size: 18),
-                                          label: Text('Pedido entregado', style: TextStyle(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                          style: buttonStyle,
-                                        ),
+                                        Text('Cliente: ${o['customer'] ?? ''}'),
+                                        Text('Total: ${o['total'] ?? ''}'),
+                                        Text('Punto: ${o['dispatchPoint'] ?? ''}'),
                                       ],
-                                    );
-                                  }
-
-                                  // espacio insuficiente vertical: usar menú compacto con las mismas acciones
-                                  return PopupMenuButton<String>(
-                                    icon: Icon(Icons.more_vert, color: Color(0xFF4A90E2)),
-                                    onSelected: (v) {
-                                      if (v == 'arrived') {
-                                        OrderService.instance.updateOrder(o['id'] ?? '', {'arrived': 'true'});
-                                      } else if (v == 'delivered') {
-                                        OrderService.instance.updateOrder(o['id'] ?? '', {'status': 'finalizado'});
-                                      }
-                                    },
-                                    itemBuilder: (_) => [
-                                      PopupMenuItem(value: 'arrived', child: Text(arrived ? 'Ya llegué' : 'Marcar llegada')),
-                                      PopupMenuItem(value: 'delivered', child: Text('Pedido entregado')),
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  // Right: action buttons column
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _gradientActionButton(
+                                        context,
+                                        icon: Icons.location_on,
+                                        label: arrived ? 'Ya llegué' : 'Marcar llegada',
+                                        enabled: !arrived,
+                                        onTap: () {
+                                          if (!arrived) OrderService.instance.markArrived(o['id'] ?? '');
+                                        },
+                                      ),
+                                      SizedBox(height: 6),
+                                      _gradientActionButton(
+                                        context,
+                                        icon: Icons.check,
+                                        label: 'Pedido entregado',
+                                        enabled: arrived,
+                                        onTap: () {
+                                          if (arrived) OrderService.instance.markDelivered(o['id'] ?? '');
+                                        },
+                                      ),
                                     ],
-                                  );
-                                }),
+                                  ),
+                                ],
                               ),
                             ),
                           );
@@ -188,7 +165,40 @@ class _RepartidorScreenState extends State<RepartidorScreen> {
                       );
                     },
                   ),
-                )
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper para crear botones con estética de Home (gradiente, sombra, ripple)
+  Widget _gradientActionButton(BuildContext context, {required IconData icon, required String label, required bool enabled, required VoidCallback onTap}) {
+    final colors = enabled ? [Color(0xFF4A90E2), Color(0xFF3B82F6)] : [Colors.grey.withOpacity(0.3), Colors.grey.withOpacity(0.2)];
+    final textColor = enabled ? Colors.white : Colors.grey[700];
+    return Container(
+      width: 120,
+      height: 32,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: enabled ? [BoxShadow(color: Color(0xFF4A90E2).withOpacity(0.25), blurRadius: 6, offset: Offset(0,3))] : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: textColor, size: 14),
+                SizedBox(width: 6),
+                Flexible(child: Text(label, style: TextStyle(color: textColor, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis)),
               ],
             ),
           ),

@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderService {
   OrderService._private();
@@ -28,6 +30,7 @@ class OrderService {
     if (atStart) list.insert(0, normalized);
     else list.add(normalized);
     pendingOrders.value = list;
+    _persist();
   }
 
   /// Actualiza un pedido existente por su id. Merge de campos proporcionados.
@@ -46,6 +49,7 @@ class OrderService {
     // pero garantiza que cualquier escucha lo pueda usar). No es estrictamente
     // necesario, pero lo dejamos por coherencia.
     if (latestOrderId.value == id) latestOrderId.value = id;
+    _persist();
     return true;
   }
 
@@ -64,11 +68,69 @@ class OrderService {
     list.removeWhere((p) => p['id'] == id);
     final removed = list.length < initialLength;
     pendingOrders.value = list;
+    _persist();
     return removed;
+  }
+
+  // Persistencia local: serializamos la lista y latestOrderId en SharedPreferences
+  static const _kOrdersKey = 'medi_express_pending_orders_v1';
+  static const _kLatestKey = 'medi_express_latest_order_id_v1';
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = jsonEncode(pendingOrders.value);
+      await prefs.setString(_kOrdersKey, jsonStr);
+      if (latestOrderId.value != null) {
+        await prefs.setString(_kLatestKey, latestOrderId.value!);
+      }
+    } catch (e) {
+      if (kDebugMode) print('OrderService: persist error: $e');
+    }
+  }
+
+  /// Marca un pedido como 'arrived' y persiste el cambio.
+  bool markArrived(String id) {
+    final updated = updateOrder(id, {'arrived': 'true'});
+    if (updated) {
+      // Asegurar que latestOrderId referencia este pedido para priorizarlo
+      latestOrderId.value = id;
+      // Persistir el latestOrderId adicional (updateOrder ya llamó a _persist, pero
+      // forzamos persistencia adicional por si hay timing)
+      _persist();
+    }
+    return updated;
+  }
+
+  /// Marca un pedido como entregado ('finalizado') y persiste el cambio.
+  bool markDelivered(String id) {
+    return updateOrder(id, {'status': 'finalizado'});
+  }
+
+  /// Carga los pedidos guardados en el almacenamiento local. Debe llamarse
+  /// una vez al iniciar la app (por ejemplo desde Home.initState).
+  Future<void> loadFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final s = prefs.getString(_kOrdersKey);
+      if (s != null && s.isNotEmpty) {
+        final decoded = jsonDecode(s) as List<dynamic>;
+        final List<Map<String, String>> restored = decoded.map<Map<String, String>>((e) {
+          final m = Map<String, dynamic>.from(e as Map);
+          return m.map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''));
+        }).toList();
+        pendingOrders.value = restored;
+      }
+      final latest = prefs.getString(_kLatestKey);
+      if (latest != null && latest.isNotEmpty) latestOrderId.value = latest;
+    } catch (e) {
+      if (kDebugMode) print('OrderService: load error: $e');
+    }
   }
 
   /// Limpia todos los pedidos pendientes (útil para pruebas)
   void clear() {
     pendingOrders.value = <Map<String, String>>[];
+    _persist();
   }
 }

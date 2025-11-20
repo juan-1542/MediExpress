@@ -111,8 +111,10 @@ class _RepartidorScreenState extends State<RepartidorScreen> {
                           return Container(
                             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 6, offset: Offset(0,3))]),
                             child: ListTile(
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               title: Text('Pedido #${o['id']}', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
                               subtitle: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   SizedBox(height: 6),
@@ -122,47 +124,63 @@ class _RepartidorScreenState extends State<RepartidorScreen> {
                                 ],
                               ),
                               trailing: ConstrainedBox(
-                                constraints: BoxConstraints(maxWidth: 140, maxHeight: 80),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // estilo compartido para ambos botones: garantiza el mismo tamaño
-                                    Builder(builder: (ctx) {
-                                      final buttonStyle = ElevatedButton.styleFrom(
-                                        minimumSize: Size(120, 36),
-                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                      );
-                                      return Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          ElevatedButton.icon(
-                                            onPressed: arrived
-                                                ? null
-                                                : () {
-                                                    OrderService.instance.updateOrder(o['id'] ?? '', {'arrived': 'true'});
-                                                  },
-                                            icon: Icon(Icons.location_on, size: 18),
-                                            label: Text(arrived ? 'Ya llegué' : 'Marcar llegada', style: TextStyle(fontSize: 12)),
-                                            style: buttonStyle,
-                                          ),
-                                          SizedBox(height: 6),
-                                          ElevatedButton.icon(
-                                            onPressed: arrived
-                                                ? () {
-                                                    OrderService.instance.updateOrder(o['id'] ?? '', {'status': 'finalizado'});
-                                                  }
-                                                : null,
-                                            icon: Icon(Icons.check, size: 18),
-                                            label: Text('Pedido entregado', style: TextStyle(fontSize: 12)),
-                                            style: buttonStyle,
-                                          ),
-                                        ],
-                                      );
-                                    }),
-                                  ],
-                                ),
+                                constraints: BoxConstraints(minWidth: 120, maxWidth: 140, minHeight: 56, maxHeight: 84),
+                                child: LayoutBuilder(builder: (trCtx, trConstr) {
+                                  final availableH = trConstr.maxHeight;
+                                  final double neededH = 36.0 * 2 + 6.0; // dos botones de 36 + spacing
+                                  final buttonStyle = ElevatedButton.styleFrom(
+                                    fixedSize: Size(120, 36),
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  );
+
+                                  if (availableH >= neededH) {
+                                    // suficiente altura: mostrar botones verticales con el mismo tamaño
+                                    return Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        ElevatedButton.icon(
+                                          onPressed: arrived
+                                              ? null
+                                              : () {
+                                                  OrderService.instance.updateOrder(o['id'] ?? '', {'arrived': 'true'});
+                                                },
+                                          icon: Icon(Icons.location_on, size: 18),
+                                          label: Text(arrived ? 'Ya llegué' : 'Marcar llegada', style: TextStyle(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                          style: buttonStyle,
+                                        ),
+                                        SizedBox(height: 6),
+                                        ElevatedButton.icon(
+                                          onPressed: arrived
+                                              ? () {
+                                                  OrderService.instance.updateOrder(o['id'] ?? '', {'status': 'finalizado'});
+                                                }
+                                              : null,
+                                          icon: Icon(Icons.check, size: 18),
+                                          label: Text('Pedido entregado', style: TextStyle(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                          style: buttonStyle,
+                                        ),
+                                      ],
+                                    );
+                                  }
+
+                                  // espacio insuficiente vertical: usar menú compacto con las mismas acciones
+                                  return PopupMenuButton<String>(
+                                    icon: Icon(Icons.more_vert, color: Color(0xFF4A90E2)),
+                                    onSelected: (v) {
+                                      if (v == 'arrived') {
+                                        OrderService.instance.updateOrder(o['id'] ?? '', {'arrived': 'true'});
+                                      } else if (v == 'delivered') {
+                                        OrderService.instance.updateOrder(o['id'] ?? '', {'status': 'finalizado'});
+                                      }
+                                    },
+                                    itemBuilder: (_) => [
+                                      PopupMenuItem(value: 'arrived', child: Text(arrived ? 'Ya llegué' : 'Marcar llegada')),
+                                      PopupMenuItem(value: 'delivered', child: Text('Pedido entregado')),
+                                    ],
+                                  );
+                                }),
                               ),
                             ),
                           );

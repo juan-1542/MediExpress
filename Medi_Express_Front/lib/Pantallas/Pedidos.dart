@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/l10n/app_localizations.dart';
+import 'package:medi_express_front/Servicios/order_service.dart';
 
 class PedidosScreen extends StatefulWidget {
   const PedidosScreen({super.key});
@@ -9,27 +10,7 @@ class PedidosScreen extends StatefulWidget {
 }
 
 class _PedidosScreenState extends State<PedidosScreen> {
-  // Lista de ejemplo de pedidos pendientes
-  final List<Map<String, String>> _orders = [
-    {
-      'id': '1001',
-      'customer': 'Carlos Pérez',
-      'items': 'Paracetamol x2, Ibuprofeno x1',
-      'total': '25000',
-    },
-    {
-      'id': '1002',
-      'customer': 'María López',
-      'items': 'Vitamina C x1',
-      'total': '15000',
-    },
-    {
-      'id': '1003',
-      'customer': 'Juan Gómez',
-      'items': 'Amoxicilina x1',
-      'total': '42000',
-    },
-  ];
+  // Ahora leemos los pedidos pendientes desde OrderService
 
   @override
   Widget build(BuildContext context) {
@@ -127,73 +108,78 @@ class _PedidosScreenState extends State<PedidosScreen> {
                 SizedBox(height: 12),
                 Flexible(
                   fit: FlexFit.loose,
-                  child: _orders.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.receipt_long, size: 48, color: Colors.grey[400]),
-                              SizedBox(height: 12),
-                              Text(t?.pendingOrders ?? 'No hay pedidos pendientes', style: TextStyle(color: Colors.grey[600])),
-                            ],
-                          ),
-                        )
-                      : ListView.separated(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          padding: EdgeInsets.only(bottom: 16),
-                          itemCount: _orders.length,
-                          separatorBuilder: (_, __) => SizedBox(height: 8),
-                          itemBuilder: (context, idx) {
-                            final o = _orders[idx];
-                            return Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(colors: [Colors.white, Color(0xFFFAFDFF)]),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey.withValues(alpha: 0.08)),
-                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 6, offset: Offset(0, 3))],
+                  child: ValueListenableBuilder<List<Map<String, String>>>(
+                    valueListenable: OrderService.instance.pendingOrders, // Escuchamos los pedidos pendientes
+                    builder: (context, _orders, _) {
+                      return _orders.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.receipt_long, size: 48, color: Colors.grey[400]),
+                                  SizedBox(height: 12),
+                                  Text(t?.pendingOrders ?? 'No hay pedidos pendientes', style: TextStyle(color: Colors.grey[600])),
+                                ],
                               ),
-                              child: ListTile(
-                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                leading: CircleAvatar(backgroundColor: Color(0xFFEEF7FF), child: Icon(Icons.person, color: Color(0xFF4A90E2))),
-                                title: Text('Pedido #${o['id']}', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(height: 4),
-                                    Text('${o['customer']} • ${o['items']}', style: TextStyle(fontSize: 12.5), softWrap: true),
-                                    SizedBox(height: 4),
-                                    Text('Total: ${o['total']}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
-                                  ],
-                                ),
-                                trailing: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(colors: [Color(0xFFFFA726), Color(0xFFF4511E)]),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text('Pendiente', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)),
+                            )
+                          : ListView.separated(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              padding: EdgeInsets.only(bottom: 16),
+                              itemCount: _orders.length,
+                              separatorBuilder: (_, __) => SizedBox(height: 8),
+                              itemBuilder: (context, idx) {
+                                final o = _orders[idx];
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(colors: [Colors.white, Color(0xFFFAFDFF)]),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.grey.withValues(alpha: 0.08)),
+                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 6, offset: Offset(0, 3))],
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    leading: CircleAvatar(backgroundColor: Color(0xFFEEF7FF), child: Icon(Icons.person, color: Color(0xFF4A90E2))),
+                                    title: Text('Pedido #${o['id']}', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF123A5A))),
+                                    subtitle: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(height: 4),
+                                        Text('${o['customer']} • ${o['items']}', style: TextStyle(fontSize: 12.5), softWrap: true),
+                                        SizedBox(height: 4),
+                                        Text('Total: ${o['total']}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+                                      ],
                                     ),
-                                    SizedBox(height: 2),
-                                    IconButton(
-                                      padding: EdgeInsets.zero,
-                                      constraints: BoxConstraints(minWidth: 16, minHeight: 16),
-                                      icon: Icon(Icons.chevron_right, color: Color(0xFF4A90E2), size: 16),
-                                      onPressed: () {
-                                        // Se puede añadir navegación a detalle del pedido aquí
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Abrir pedido #${o['id']}')));
-                                      },
-                                    )
-                                  ],
-                                ),
-                              ),
+                                    trailing: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(colors: [Color(0xFFFFA726), Color(0xFFF4511E)]),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text('Pendiente', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)),
+                                        ),
+                                        SizedBox(height: 2),
+                                        IconButton(
+                                          padding: EdgeInsets.zero,
+                                          constraints: BoxConstraints(minWidth: 16, minHeight: 16),
+                                          icon: Icon(Icons.chevron_right, color: Color(0xFF4A90E2), size: 16),
+                                          onPressed: () {
+                                            // Se puede añadir navegación a detalle del pedido aquí
+                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Abrir pedido #${o['id']}')));
+                                          },
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             );
-                          },
-                        ),
+                    },
+                  ),
                 ),
               ],
             ),

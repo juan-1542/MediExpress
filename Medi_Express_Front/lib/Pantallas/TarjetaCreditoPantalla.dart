@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'Estado_Pedido.dart';
 import '../Servicios/cart_service.dart';
 import 'package:medi_express_front/l10n/app_localizations.dart';
+import 'package:medi_express_front/Servicios/order_service.dart';
 
 // Formatter que inserta automáticamente '/' después de los dos primeros dígitos
 class ExpiryDateInputFormatter extends TextInputFormatter {
@@ -214,6 +215,16 @@ class _TarjetaCreditoPantallaState extends State<TarjetaCreditoPantalla> {
                             'nombre': nombre,
                             'metodo': _metodoFromArgs,
                           };
+
+                          // Añadir pedido a pendientes
+                          try {
+                            OrderService.instance.addOrder({
+                              'id': orderId,
+                              'customer': nombre,
+                              'items': '', // no tenemos articulos aquí, se podría pasar desde args si es necesario
+                              'total': _monto.toString(),
+                            });
+                          } catch (_) {}
 
                           if (context.mounted) Navigator.of(context).pop();
 

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:medi_express_front/l10n/app_localizations.dart';
 import '../Servicios/cart_service.dart';
 import 'Estado_Pedido.dart';
+import 'package:medi_express_front/Servicios/order_service.dart';
 
 class EfectivoPantalla extends StatefulWidget {
   const EfectivoPantalla({super.key});
@@ -208,6 +209,16 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
       // Limpiar carrito
       try {
         CartService.instance.clear();
+      } catch (_) {}
+
+      // Añadir pedido a pendientes
+      try {
+        OrderService.instance.addOrder({
+          'id': orderId,
+          'customer': '', // opcional: se puede mapear desde usuario actual
+          'items': _articulos.map((a) => a['name'] ?? a['title'] ?? '').join(', '),
+          'total': _monto.toString(),
+        });
       } catch (_) {}
 
       // Cerrar loader

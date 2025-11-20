@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'Estado_Pedido.dart';
 import '../Servicios/cart_service.dart';
 import 'package:medi_express_front/l10n/app_localizations.dart';
+import 'package:medi_express_front/Servicios/order_service.dart';
 
 // Formatter que inserta automáticamente '/' después de los dos primeros dígitos
 class ExpiryDateInputFormatter extends TextInputFormatter {
@@ -202,6 +203,16 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
                             'metodo': _metodoFromArgs,
                           };
 
+                          // Añadir pedido a pendientes
+                          try {
+                            OrderService.instance.addOrder({
+                              'id': orderId,
+                              'customer': nombre,
+                              'items': '',
+                              'total': _monto.toString(),
+                            });
+                          } catch (_) {}
+
                           // Cerrar diálogo
                           if (context.mounted) Navigator.of(context).pop();
 
@@ -341,7 +352,7 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) return l10n.expiryRequired;
-            final regex = RegExp(r'^(0[1-9]|1[0-2])\/(\d{2})$');
+            final regex = RegExp(r'^(0[1-9]|1[0-2])/(\d{2})$');
             final match = regex.firstMatch(value);
             if (match == null) return l10n.expiryInvalidFormat;
             final mm = int.parse(match.group(1)!);

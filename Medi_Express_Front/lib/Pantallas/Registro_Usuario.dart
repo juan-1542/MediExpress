@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
 import 'package:medi_express_front/Pantallas/Home.dart';
+import 'package:medi_express_front/Pantallas/Repartidor.dart';
 import 'package:medi_express_front/l10n/app_localizations.dart';
 
 class RegistroUsuarioScreen extends StatefulWidget {
@@ -48,7 +49,12 @@ class _RegistroUsuarioScreenState extends State<RegistroUsuarioScreen> {
       // Si se registró correctamente, hacemos login automático
       AuthService.instance.login(user);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.registrationAndLoginSuccess)));
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+      // Redirigir según rol (si es repartidor, al área de repartidor)
+      if (user.role.toLowerCase() == 'repartidor') {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const RepartidorScreen()));
+      } else {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+      }
     });
   }
 
@@ -161,6 +167,8 @@ class _RegistroUsuarioScreenState extends State<RegistroUsuarioScreen> {
                         items: [
                           DropdownMenuItem(value: 'cliente', child: Text(l10n.userTypeClient)),
                           DropdownMenuItem(value: 'admin', child: Text(l10n.userTypeAdmin)),
+                          // Añadido: opción para registrar como repartidor
+                          DropdownMenuItem(value: 'repartidor', child: Text('Repartidor')),
                         ],
                         onChanged: (v) => setState(() => _tipoUsuario = v ?? 'cliente'),
                         validator: (v) => (v == null || v.isEmpty) ? l10n.userTypeRequired : null,

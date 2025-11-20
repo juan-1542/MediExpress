@@ -28,11 +28,9 @@ class _StoredUser {
 
 class AuthService {
   AuthService._private() {
-    // Sembrar usuarios de demostración sólo en modo debug para evitar exponer
-    // credenciales en builds de producción.
-    if (kDebugMode) {
-      _seedDemoUsers();
-    }
+    // Sembrar usuarios demo también en builds web/release según petición:
+    // añadimos los usuarios demo completos siempre (incluye admin, cliente y repartidor).
+    _seedDemoUsers();
   }
   static final AuthService instance = AuthService._private();
 

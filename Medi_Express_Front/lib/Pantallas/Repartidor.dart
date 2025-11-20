@@ -101,7 +101,12 @@ class _RepartidorScreenState extends State<RepartidorScreen> {
                   child: ValueListenableBuilder<List<Map<String, String>>>(
                     valueListenable: OrderService.instance.pendingOrders,
                     builder: (_, orders, __) {
-                      final assigned = orders.where((o) => (o['courier'] ?? '') == (user?.fullName ?? 'Repartidor Demo')).toList();
+                      // Mostrar solo pedidos asignados a este repartidor y que no estén finalizados
+                      final assigned = orders.where((o) {
+                        final courier = (o['courier'] ?? '');
+                        final status = (o['status'] ?? '');
+                        return courier == (user?.fullName ?? 'Repartidor Demo') && status != 'finalizado';
+                      }).toList();
                       if (assigned.isEmpty) return Center(child: Text('No hay pedidos asignados'));
                       final bottomPad = math.max(MediaQuery.of(context).viewPadding.bottom, kBottomNavigationBarHeight);
                       return ListView.separated(

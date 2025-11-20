@@ -66,6 +66,14 @@ class AuthService {
         'role': 'cliente'
       },
       {
+        'fullName': 'Repartidor Demo',
+        'email': 'repartidor@demo.com',
+        'phone': '+573000000003',
+        'address': 'Calle Repartidor 1',
+        'password': 'repartidor123',
+        'role': 'repartidor'
+      },
+      {
         'fullName': 'Usuario Teléfono',
         'email': 'userphone@demo.com',
         'phone': '+573001234567',
@@ -148,7 +156,7 @@ class AuthService {
     return false;
   }
 
-  /// Actualiza los datos del usuario en el store; si cambió el email actualiza la clave.
+  /// Actualiza los datos del usuario en el store; si cambió la clave actualiza la clave.
   /// Si el usuario no estaba registrado en el store, añade una entrada con la password especificada (si se pasa),
   /// o no la añade si no se encuentra registro previo.
   void updateUser(AppUser updated, {String? oldEmail, String? password}) {

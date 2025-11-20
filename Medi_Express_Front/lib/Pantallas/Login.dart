@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Pantallas/Registro_Usuario.dart';
 import 'package:medi_express_front/Pantallas/Home.dart';
+import 'package:medi_express_front/Pantallas/Repartidor.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
 import 'package:medi_express_front/l10n/app_localizations.dart';
 
@@ -31,7 +32,13 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t?.loginSuccess ?? 'Inicio de sesión correcto')));
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+      // Redirigir según rol
+      final user = AuthService.instance.currentUser.value;
+      if (user != null && user.role.toLowerCase() == 'repartidor') {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const RepartidorScreen()));
+      } else {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+      }
     });
   }
 

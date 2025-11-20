@@ -203,7 +203,7 @@ class _TarjetaDebitoPantallaState extends State<TarjetaDebitoPantalla> {
                             'metodo': _metodoFromArgs,
                           };
 
-                          // Añadir pedido a pendientes
+                          // Añadir pedido a pendientes (sin asignar courier por defecto)
                           try {
                             OrderService.instance.addOrder({
                               'id': orderId,

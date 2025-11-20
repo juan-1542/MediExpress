@@ -211,7 +211,7 @@ class _EfectivoPantallaState extends State<EfectivoPantalla> {
         CartService.instance.clear();
       } catch (_) {}
 
-      // Añadir pedido a pendientes
+      // Añadir pedido a pendientes (sin asignar courier por defecto).
       try {
         OrderService.instance.addOrder({
           'id': orderId,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi_express_front/Servicios/auth_service.dart';
 import 'package:medi_express_front/Servicios/order_service.dart';
+import 'package:medi_express_front/Pantallas/Login.dart';
 
 class RepartidorScreen extends StatefulWidget {
   const RepartidorScreen({super.key});
@@ -42,9 +43,21 @@ class _RepartidorScreenState extends State<RepartidorScreen> {
               padding: const EdgeInsets.only(left: 8.0),
               child: CircleAvatar(
                 backgroundColor: Colors.white.withValues(alpha: 0.9),
-                child: IconButton(
-                  icon: Icon(Icons.person, color: Color(0xFF1E3A8A)),
-                  onPressed: () {},
+                child: PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'logout') {
+                      AuthService.instance.logout();
+                      // Reemplazar la pila de rutas y llevar al login
+                      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => LoginScreen()), (route) => false);
+                    }
+                  },
+                  itemBuilder: (ctx) => [
+                    PopupMenuItem(value: 'logout', child: Row(children: [Icon(Icons.logout, size: 18), SizedBox(width: 8), Text('Cerrar sesión')])),
+                  ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: Icon(Icons.person, color: Color(0xFF1E3A8A)),
+                  ),
                 ),
               ),
             ),
@@ -63,7 +76,7 @@ class _RepartidorScreenState extends State<RepartidorScreen> {
                 icon: Icon(Icons.logout, color: Colors.white),
                 onPressed: () {
                   AuthService.instance.logout();
-                  Navigator.of(context).popUntil((r) => r.isFirst);
+                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => LoginScreen()), (route) => false);
                 },
               )
             ],
@@ -108,29 +121,48 @@ class _RepartidorScreenState extends State<RepartidorScreen> {
                                   Text('Punto: ${o['dispatchPoint'] ?? ''}'),
                                 ],
                               ),
-                              trailing: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ElevatedButton.icon(
-                                    onPressed: arrived
-                                        ? null
-                                        : () {
-                                            OrderService.instance.updateOrder(o['id'] ?? '', {'arrived': 'true'});
-                                          },
-                                    icon: Icon(Icons.location_on),
-                                    label: Text(arrived ? 'Ya llegué' : 'Marcar llegada'),
-                                  ),
-                                  SizedBox(height: 6),
-                                  ElevatedButton.icon(
-                                    onPressed: arrived
-                                        ? () {
-                                            OrderService.instance.updateOrder(o['id'] ?? '', {'status': 'finalizado'});
-                                          }
-                                        : null,
-                                    icon: Icon(Icons.check),
-                                    label: Text('Pedido entregado'),
-                                  ),
-                                ],
+                              trailing: ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: 140, maxHeight: 80),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // estilo compartido para ambos botones: garantiza el mismo tamaño
+                                    Builder(builder: (ctx) {
+                                      final buttonStyle = ElevatedButton.styleFrom(
+                                        minimumSize: Size(120, 36),
+                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      );
+                                      return Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ElevatedButton.icon(
+                                            onPressed: arrived
+                                                ? null
+                                                : () {
+                                                    OrderService.instance.updateOrder(o['id'] ?? '', {'arrived': 'true'});
+                                                  },
+                                            icon: Icon(Icons.location_on, size: 18),
+                                            label: Text(arrived ? 'Ya llegué' : 'Marcar llegada', style: TextStyle(fontSize: 12)),
+                                            style: buttonStyle,
+                                          ),
+                                          SizedBox(height: 6),
+                                          ElevatedButton.icon(
+                                            onPressed: arrived
+                                                ? () {
+                                                    OrderService.instance.updateOrder(o['id'] ?? '', {'status': 'finalizado'});
+                                                  }
+                                                : null,
+                                            icon: Icon(Icons.check, size: 18),
+                                            label: Text('Pedido entregado', style: TextStyle(fontSize: 12)),
+                                            style: buttonStyle,
+                                          ),
+                                        ],
+                                      );
+                                    }),
+                                  ],
+                                ),
                               ),
                             ),
                           );

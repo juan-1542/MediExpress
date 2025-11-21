@@ -4,6 +4,7 @@ import 'package:medi_express_front/Servicios/product_service.dart';
 import 'package:medi_express_front/Servicios/distribution_service.dart';
 import 'package:medi_express_front/l10n/app_localizations.dart';
 import 'package:medi_express_front/Pantallas/Pedidos.dart';
+import 'package:flutter/foundation.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -13,6 +14,239 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
+  // Mostrar diálogo para añadir/editar productos (solo web visible)
+  void _showProductAdminDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Productos (web)'),
+          content: SizedBox(
+            width: 700,
+            child: ValueListenableBuilder<List<Map<String, String>>>(
+              valueListenable: ProductService.instance.products,
+              builder: (context, list, _) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _openProductForm(),
+                      icon: Icon(Icons.add),
+                      label: Text('Añadir producto'),
+                    ),
+                    SizedBox(height: 12),
+                    if (list.isEmpty) Text('No hay productos'),
+                    if (list.isNotEmpty)
+                      Flexible(
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: list.length,
+                          separatorBuilder: (_, __) => Divider(),
+                          itemBuilder: (context, idx) {
+                            final p = list[idx];
+                            return ListTile(
+                              title: Text(p['name_en'] ?? p['name'] ?? ''),
+                              subtitle: Text(p['price'] ?? ''),
+                              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit),
+                                  onPressed: () => _openProductForm(editIndex: idx, initial: p),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () {
+                                    ProductService.instance.removeProductAt(idx);
+                                  },
+                                ),
+                              ]),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+          actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('Cerrar'))],
+        );
+      },
+    );
+  }
+
+  void _openProductForm({int? editIndex, Map<String, String>? initial}) {
+    final nameEs = TextEditingController(text: initial?['name_es'] ?? initial?['name'] ?? '');
+    final nameEn = TextEditingController(text: initial?['name_en'] ?? initial?['name'] ?? '');
+    final namePt = TextEditingController(text: initial?['name_pt'] ?? initial?['name'] ?? '');
+    final price = TextEditingController(text: initial?['price'] ?? '');
+    final dosage = TextEditingController(text: initial?['dosage'] ?? '');
+    final description = TextEditingController(text: initial?['description'] ?? '');
+    final quantity = TextEditingController(text: initial?['quantity'] ?? '');
+
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(editIndex == null ? 'Añadir producto' : 'Editar producto'),
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: 600,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(controller: nameEs, decoration: InputDecoration(labelText: 'Nombre (es)')),
+                  TextField(controller: nameEn, decoration: InputDecoration(labelText: 'Nombre (en)')),
+                  TextField(controller: namePt, decoration: InputDecoration(labelText: 'Nombre (pt)')),
+                  TextField(controller: price, decoration: InputDecoration(labelText: 'Precio')),
+                  TextField(controller: dosage, decoration: InputDecoration(labelText: 'Dosis')),
+                  TextField(controller: quantity, decoration: InputDecoration(labelText: 'Cantidad')),
+                  TextField(controller: description, decoration: InputDecoration(labelText: 'Descripción'), maxLines: 3),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancelar')),
+            ElevatedButton(
+              onPressed: () {
+                final map = {
+                  'name_es': nameEs.text,
+                  'name_en': nameEn.text,
+                  'name_pt': namePt.text,
+                  'price': price.text,
+                  'dosage': dosage.text,
+                  'description': description.text,
+                  'quantity': quantity.text,
+                };
+                if (editIndex == null) {
+                  ProductService.instance.addProduct(map);
+                } else {
+                  ProductService.instance.updateProductAt(editIndex, map);
+                }
+                Navigator.pop(context);
+                Navigator.pop(context); // cerrar listado también
+              },
+              child: Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Mostrar diálogo para añadir/editar puntos de distribución (solo web visible)
+  void _showDistributionAdminDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Puntos de distribución (web)'),
+          content: SizedBox(
+            width: 700,
+            child: ValueListenableBuilder<List<DistributionInfo>>(
+              valueListenable: DistributionService.instance.points,
+              builder: (context, list, _) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _openDistributionForm(),
+                      icon: Icon(Icons.add),
+                      label: Text('Añadir punto'),
+                    ),
+                    SizedBox(height: 12),
+                    if (list.isEmpty) Text('No hay puntos'),
+                    if (list.isNotEmpty)
+                      Flexible(
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: list.length,
+                          separatorBuilder: (_, __) => Divider(),
+                          itemBuilder: (context, idx) {
+                            final p = list[idx];
+                            return ListTile(
+                              title: Text(p.name),
+                              subtitle: Text(p.address),
+                              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit),
+                                  onPressed: () => _openDistributionForm(editIndex: idx, initial: p),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () => DistributionService.instance.removePointAt(idx),
+                                ),
+                              ]),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+          actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('Cerrar'))],
+        );
+      },
+    );
+  }
+
+  void _openDistributionForm({int? editIndex, DistributionInfo? initial}) {
+    final name = TextEditingController(text: initial?.name ?? '');
+    final address = TextEditingController(text: initial?.address ?? '');
+    final hours = TextEditingController(text: initial?.openingHours ?? '');
+    bool available = initial?.available ?? true;
+
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: Text(editIndex == null ? 'Añadir punto' : 'Editar punto'),
+            content: SizedBox(
+              width: 600,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(controller: name, decoration: InputDecoration(labelText: 'Nombre')),
+                  TextField(controller: address, decoration: InputDecoration(labelText: 'Dirección')),
+                  TextField(controller: hours, decoration: InputDecoration(labelText: 'Horario')),
+                  Row(children: [
+                    Text('Disponible'),
+                    Switch(value: available, onChanged: (v) => setState(() => available = v)),
+                  ])
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancelar')),
+              ElevatedButton(
+                onPressed: () {
+                  final d = DistributionInfo(name: name.text, address: address.text, openingHours: hours.text, available: available);
+                  if (editIndex == null) {
+                    DistributionService.instance.addPoint(d);
+                  } else {
+                    DistributionService.instance.info.value = d; // actualizar selección temporal
+                    // actualizar lista: hacer remove/add a la posición
+                    final list = List<DistributionInfo>.from(DistributionService.instance.points.value);
+                    if (editIndex >= 0 && editIndex < list.length) {
+                      list[editIndex] = d;
+                      DistributionService.instance.points.value = list;
+                    }
+                  }
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: Text('Guardar'),
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
@@ -157,8 +391,33 @@ class _AdminScreenState extends State<AdminScreen> {
                 ]),
               ),
 
-              SizedBox(height: 30),
+              SizedBox(height: 16),
 
+              // Botones de administración visibles solo en web
+              if (kIsWeb) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _showProductAdminDialog,
+                        icon: Icon(Icons.medication, color: Colors.white),
+                        label: Text('Administrar productos (web)'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF4A90E2), padding: EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _showDistributionAdminDialog,
+                        icon: Icon(Icons.store, color: Colors.white),
+                        label: Text('Administrar puntos (web)'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF4A90E2), padding: EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 30),
+              ],
             ]),
           ),
         ),
